@@ -15,6 +15,5 @@
         "8/": true,
         "9/": true,
         "10/": true,
-        "*.xml":true,
     }
 }

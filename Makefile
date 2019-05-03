@@ -19,7 +19,7 @@ MODULEDIR   = drivers/${ROBOT}
 SOURCES     = ${ROBOT}.cpp spline.cpp trackdesc.cpp pathfinder.cpp mycar.cpp
 
 SHIPDIR     = drivers/${ROBOT}
-SHIP        = ${ROBOT}.xml car1-trb1.rgb logo.rgb
+SHIP        = ${ROBOT}.xml logo.rgb
 SHIPSUBDIRS = 1 2 3 4 5 6 7 8 9 10
 
 PKGSUBDIRS  = ${SHIPSUBDIRS}

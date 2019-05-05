@@ -54,6 +54,13 @@ const double MyCar::MAX_FUEL_PER_METER = 0.0008;/* [liter/m] fuel consumption */
 const double MyCar::LOOKAHEAD_MAX_ERROR = 2.0;	/* [m] */
 const double MyCar::LOOKAHEAD_FACTOR = 1.0/3.0; /* [-] */
 
+/************ Added Vars ***********/
+
+/****** GL Windows ******/
+int statsWindow;
+bool createdStatsWindow = false;
+int i;
+
 
 MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 {
@@ -201,6 +208,16 @@ void MyCar::update(TrackDesc* track, tCarElt* car, tSituation *situation)
 	mass = carmass + car->priv.fuel;
 	trtime += situation->deltaTime;
 	deltapitch = MAX(-track->getSegmentPtr(currentsegid)->getKgamma() - me->_pitch, 0.0);
+
+	//init debug GL window
+	if(!createdStatsWindow)
+	{
+		initGLUTWindow();
+		createdStatsWindow = true;
+	}
+	//if created , update
+	GLUTWindowRedisplay();
+
 }
 
 
@@ -325,4 +342,53 @@ void MyCar::initCarGeometry()
 	CARLEN = me->_dimension_x;
 }
 
+/************************************************
+ *				 Debug GL Window				*
+ ***********************************************/
+void MyCar::initGLUTWindow()
+{
+	glutInitWindowSize(600, 300);
+	statsWindow = glutCreateWindow("Stats");
+	glutDisplayFunc(drawCurrStats);
+}
 
+void MyCar::GLUTWindowRedisplay()
+{
+	int gameplayWindow = glutGetWindow();
+	glutSetWindow(statsWindow);
+	glutPostRedisplay();
+	glutSetWindow(gameplayWindow);
+}
+
+void drawCurrStats()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(1, 1, 1, 1);
+
+	int w = glutGet(GLUT_WINDOW_WIDTH);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glOrtho(0.0f, w, h, 0.0f, 0.0f, 1.0f);
+	glPushMatrix();
+		glColor3f(0, 0, 0);
+		i++;
+		std::string infoString = std::string("Frame number") + std::to_string(i);
+		printText(24, 40, (char*)infoString.c_str());
+	glPopMatrix();
+	glutSwapBuffers();
+}
+
+void printText(int x, int y, char *string)
+{
+	int length, i;
+	length = strlen(string);
+	glRasterPos2i(x, y); //find where to start printing (pixel information)
+	for (i = 0; i < length; i++)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, string[i]); // Print a character of the text on the window
+	}
+}

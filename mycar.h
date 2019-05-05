@@ -18,7 +18,7 @@
  ***************************************************************************/
 
 /*
-	this class holds some properties of the car
+	this class holds some properties of the car //equiv to driver.h
 */
 
 #ifndef _MYCAR_H_
@@ -38,6 +38,7 @@
 #include "trackdesc.h"
 #include "pathfinder.h"
 #include "linalg.h"
+#include "GL/glut.h"
 
 
 class Pathfinder;
@@ -170,6 +171,10 @@ class MyCar : public AbstractCar
 		inline double getErrorSgn() { return derrorsgn; }
 		inline Pathfinder* getPathfinderPtr() { return pf; }
 
+		//Debug GL window
+		void initGLUTWindow();
+		void GLUTWindowRedisplay();
+
 	private:
 		enum { DRWD = 0, DFWD = 1, D4WD = 2 };
 
@@ -198,6 +203,16 @@ class OtherCar: public AbstractCar
 		TrackDesc* track;
 		double dt;
 };
+
+/*************************************************
+ * 		GLOBAL SUPPORT FUNCTIONS				 *
+ * **********************************************/
+
+/*************************
+ *  DEBUG GL WINDOW 	 *
+ * **********************/
+void drawCurrStats();
+void printText(int x, int y, char *string);
 
 #endif // _MYCAR_H_
 

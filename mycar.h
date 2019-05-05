@@ -38,7 +38,7 @@
 #include "trackdesc.h"
 #include "pathfinder.h"
 #include "linalg.h"
-#include "GL/glut.h"
+#include "GL/freeglut.h"
 
 
 class Pathfinder;
@@ -174,6 +174,7 @@ class MyCar : public AbstractCar
 		//Debug GL window
 		void initGLUTWindow();
 		void GLUTWindowRedisplay();
+		void destroyGLUTWindow();
 
 	private:
 		enum { DRWD = 0, DFWD = 1, D4WD = 2 };

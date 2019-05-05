@@ -54,12 +54,11 @@ const double MyCar::MAX_FUEL_PER_METER = 0.0008;/* [liter/m] fuel consumption */
 const double MyCar::LOOKAHEAD_MAX_ERROR = 2.0;	/* [m] */
 const double MyCar::LOOKAHEAD_FACTOR = 1.0/3.0; /* [-] */
 
-/************ Added Vars ***********/
-
-/****** GL Windows ******/
-int statsWindow;
+//Debug GL Window
+int statsWindow = 0;
 bool createdStatsWindow = false;
-int i;
+int i = 0;
+std::string infoString;
 
 
 MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
@@ -148,11 +147,13 @@ MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 
 	/* this call is needed! perhaps i shold move it into the constructor of pathfinder. */
 	pf->plan(this);
+
 }
 
 
 MyCar::~MyCar()
 {
+	destroyGLUTWindow();
 	delete pf;
 }
 
@@ -209,14 +210,12 @@ void MyCar::update(TrackDesc* track, tCarElt* car, tSituation *situation)
 	trtime += situation->deltaTime;
 	deltapitch = MAX(-track->getSegmentPtr(currentsegid)->getKgamma() - me->_pitch, 0.0);
 
-	//init debug GL window
-	if(!createdStatsWindow)
-	{
+	//init and update aux windows
+	if (!createdStatsWindow){
 		initGLUTWindow();
 		createdStatsWindow = true;
 	}
-	//if created , update
-	GLUTWindowRedisplay();
+	GLUTWindowRedisplay(); //update aux windows
 
 }
 
@@ -347,9 +346,16 @@ void MyCar::initCarGeometry()
  ***********************************************/
 void MyCar::initGLUTWindow()
 {
+	glutSetOption(
+		GLUT_ACTION_ON_WINDOW_CLOSE,
+		GLUT_ACTION_CONTINUE_EXECUTION
+	);
+
 	glutInitWindowSize(600, 300);
 	statsWindow = glutCreateWindow("Stats");
+	glutPositionWindow(720,0);
 	glutDisplayFunc(drawCurrStats);
+	std::cout<< "Statswindow int: " << statsWindow << std::endl;
 }
 
 void MyCar::GLUTWindowRedisplay()
@@ -359,6 +365,16 @@ void MyCar::GLUTWindowRedisplay()
 	glutPostRedisplay();
 	glutSetWindow(gameplayWindow);
 }
+
+void MyCar::destroyGLUTWindow()
+{
+	glutDestroyWindow(statsWindow);
+	statsWindow = 0;
+}
+
+/*********************************************************
+ *				 Debug GL Window - Support functions     *
+ *********************************************************/
 
 void drawCurrStats()
 {

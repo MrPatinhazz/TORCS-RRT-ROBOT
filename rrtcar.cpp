@@ -88,8 +88,6 @@ static void shutdown(int index) {
 	if (mycar[i] != NULL) {
 		delete mycar[i];
 		mycar[i] = NULL;
-		//free(botdesc[i]);
-		//free(botname[i]);
 	}
 	if (myTrackDesc != NULL) {
 		delete myTrackDesc;

@@ -1,0 +1,5 @@
+Detetar onde é feita a ultrapassagem e imprimir mensagem
+
+Construir a classe RRT e implementar um teste inicial onde é construída uma árvore no início da pista
+
+Desenhar a árvore construída utilizando a debug window. Já imprime texto mas ainda não desenha formas

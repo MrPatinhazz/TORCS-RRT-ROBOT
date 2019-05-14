@@ -26,6 +26,8 @@
 #include "dmalloc.h"
 #endif
 
+using namespace std;
+
 const double MyCar::PATHERR = 0.5;				/* if derror > PATHERR we take actions to come back to the path [m] */
 const double MyCar::CORRLEN = 30.0;				/* CORRLEN * derror is the length of the correction [m] */
 const double MyCar::TURNTOL = 1.0;				/* tolerance for end backing up [m] */
@@ -58,7 +60,8 @@ const double MyCar::LOOKAHEAD_FACTOR = 1.0/3.0; /* [-] */
 int statsWindow = 0;
 bool createdStatsWindow = false;
 int i = 0;
-std::string infoString;
+tCarElt *carHolder;
+string infoString;
 
 
 MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
@@ -68,6 +71,8 @@ MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 
 	/* init pointer to car data */
 	setCarPtr(car);
+	//Debug functions can access carHolder
+	carHolder = car; //similar to carHolder = getCarPtr()
 	initCGh();
 	initCarGeometry();
 	updatePos();
@@ -154,6 +159,7 @@ MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 MyCar::~MyCar()
 {
 	destroyGLUTWindow();
+	carHolder = nullptr;
 	delete pf;
 }
 
@@ -188,7 +194,9 @@ void MyCar::update(TrackDesc* track, tCarElt* car, tSituation *situation)
 	updateDir();
 	updateSpeedSqr();
 	updateSpeed();
-
+	//PRINTING INFO
+	//info();
+	
 	/* update currentsegment and destination segment id's */
 	int searchrange = MAX((int) ceil(situation->deltaTime*speed+1.0) * 2, 4);
 	currentsegid = destsegid = pf->getCurrentSegment(car, searchrange);
@@ -216,7 +224,6 @@ void MyCar::update(TrackDesc* track, tCarElt* car, tSituation *situation)
 		createdStatsWindow = true;
 	}
 	GLUTWindowRedisplay(); //update aux windows
-
 }
 
 
@@ -232,7 +239,6 @@ void MyCar::loadBehaviour(int id) {
 	PATHERRFACTOR = behaviour[id][7];
 }
 
-
 void MyCar::updateCa()
 {
 	const char *WheelSect[4] = {SECT_FRNTRGTWHEEL, SECT_FRNTLFTWHEEL, SECT_REARRGTWHEEL, SECT_REARLFTWHEEL};
@@ -246,7 +252,6 @@ void MyCar::updateCa()
 	h*= 1.5; h = h*h; h = h*h; h = 2.0 * exp(-3.0*h);
 	ca = AEROMAGIC*(h*cl + 4.0*wingca);
 }
-
 
 /*
 	compute the slip velocity.
@@ -276,7 +281,6 @@ double MyCar::querySlipSpeed(tCarElt* car)
 	return s - car->_speed_x;
 }
 
-
 /*
 	compute an acceleration value for a given speed
 */
@@ -300,7 +304,6 @@ double MyCar::queryAcceleration(tCarElt * car, double speed)
 	if (a > 1.0) return 1.0; else return a;
 }
 
-
 void OtherCar::init(TrackDesc* itrack, tCarElt* car, tSituation *situation)
 {
 	track = itrack;
@@ -315,7 +318,6 @@ void OtherCar::init(TrackDesc* itrack, tCarElt* car, tSituation *situation)
 	updateSpeed();
 }
 
-
 void OtherCar::update()
 {
 	updatePos();
@@ -326,7 +328,6 @@ void OtherCar::update()
     int searchrange = MAX((int) ceil(dt*speed+1.0) * 2, 4);
 	currentsegid = track->getCurrentSegment(getCarPtr(), currentsegid, searchrange);
 }
-
 
 void MyCar::updateDError()
 {
@@ -361,6 +362,7 @@ void MyCar::initGLUTWindow()
 void MyCar::GLUTWindowRedisplay()
 {
 	int gameplayWindow = glutGetWindow();
+
 	glutSetWindow(statsWindow);
 	glutPostRedisplay();
 	glutSetWindow(gameplayWindow);
@@ -391,9 +393,23 @@ void drawCurrStats()
 	glOrtho(0.0f, w, h, 0.0f, 0.0f, 1.0f);
 	glPushMatrix();
 		glColor3f(0, 0, 0);
+		int x = 10; int y = 30;
+
 		i++;
-		std::string infoString = std::string("Frame number") + std::to_string(i);
-		printText(24, 40, (char*)infoString.c_str());
+		infoString = "Update number: " + to_string(i);
+		printText(x, y, (char*)infoString.c_str());
+
+		y+=30;
+		infoString = "Curr. position: " + 
+		string("X:") + to_string((float)carHolder->_pos_X) +
+		string(" Y:") + to_string((float)carHolder->_pos_Y) + 
+		string(" Z:") + to_string((float)carHolder->_pos_Z);
+		printText(x, y, (char*)infoString.c_str());
+
+		y+=30;
+		infoString = "Curr. speed: ";
+		printText(x, y, (char*)infoString.c_str());
+
 	glPopMatrix();
 	glutSwapBuffers();
 }
@@ -405,6 +421,6 @@ void printText(int x, int y, char *string)
 	glRasterPos2i(x, y); //find where to start printing (pixel information)
 	for (i = 0; i < length; i++)
 	{
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, string[i]); // Print a character of the text on the window
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]); // Print a character of the text on the window
 	}
 }

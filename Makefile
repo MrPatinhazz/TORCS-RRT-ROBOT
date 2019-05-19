@@ -16,7 +16,7 @@
 ROBOT       = rrtcar
 MODULE      = ${ROBOT}.so
 MODULEDIR   = drivers/${ROBOT}
-SOURCES     = ${ROBOT}.cpp spline.cpp trackdesc.cpp pathfinder.cpp mycar.cpp
+SOURCES     = ${ROBOT}.cpp dwindow.cpp spline.cpp trackdesc.cpp pathfinder.cpp mycar.cpp
 
 SHIPDIR     = drivers/${ROBOT}
 SHIP        = ${ROBOT}.xml logo.rgb

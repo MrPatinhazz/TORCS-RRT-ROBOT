@@ -56,14 +56,6 @@ const double MyCar::MAX_FUEL_PER_METER = 0.0008;/* [liter/m] fuel consumption */
 const double MyCar::LOOKAHEAD_MAX_ERROR = 2.0;	/* [m] */
 const double MyCar::LOOKAHEAD_FACTOR = 1.0/3.0; /* [-] */
 
-//Debug GL Window
-int statsWindow = 0;
-bool createdStatsWindow = false;
-int i = 0;
-tCarElt *carHolder;
-string infoString;
-
-
 MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 {
     AEROMAGIC = GfParmGetNum(car->_carHandle, RRTCAR_SECT_PRIV, RRTCAR_ATT_AMAGIC, (char*)NULL, 1.6f);
@@ -71,8 +63,6 @@ MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 
 	/* init pointer to car data */
 	setCarPtr(car);
-	//Debug functions can access carHolder
-	carHolder = car; //similar to carHolder = getCarPtr()
 	initCGh();
 	initCarGeometry();
 	updatePos();
@@ -158,8 +148,6 @@ MyCar::MyCar(TrackDesc* track, tCarElt* car, tSituation *situation)
 
 MyCar::~MyCar()
 {
-	destroyGLUTWindow();
-	carHolder = nullptr;
 	delete pf;
 }
 
@@ -217,13 +205,6 @@ void MyCar::update(TrackDesc* track, tCarElt* car, tSituation *situation)
 	mass = carmass + car->priv.fuel;
 	trtime += situation->deltaTime;
 	deltapitch = MAX(-track->getSegmentPtr(currentsegid)->getKgamma() - me->_pitch, 0.0);
-
-	//init and update aux windows
-	if (!createdStatsWindow){
-		initGLUTWindow();
-		createdStatsWindow = true;
-	}
-	GLUTWindowRedisplay(); //update aux windows
 }
 
 
@@ -340,87 +321,4 @@ void MyCar::initCarGeometry()
 {
 	CARWIDTH = me->_dimension_y;
 	CARLEN = me->_dimension_x;
-}
-
-/************************************************
- *				 Debug GL Window				*
- ***********************************************/
-void MyCar::initGLUTWindow()
-{
-	glutSetOption(
-		GLUT_ACTION_ON_WINDOW_CLOSE,
-		GLUT_ACTION_CONTINUE_EXECUTION
-	);
-
-	glutInitWindowSize(600, 300);
-	statsWindow = glutCreateWindow("Stats");
-	glutPositionWindow(720,0);
-	glutDisplayFunc(drawCurrStats);
-	std::cout<< "Statswindow int: " << statsWindow << std::endl;
-}
-
-void MyCar::GLUTWindowRedisplay()
-{
-	int gameplayWindow = glutGetWindow();
-
-	glutSetWindow(statsWindow);
-	glutPostRedisplay();
-	glutSetWindow(gameplayWindow);
-}
-
-void MyCar::destroyGLUTWindow()
-{
-	glutDestroyWindow(statsWindow);
-	statsWindow = 0;
-}
-
-/*********************************************************
- *				 Debug GL Window - Support functions     *
- *********************************************************/
-
-void drawCurrStats()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1, 1, 1, 1);
-
-	int w = glutGet(GLUT_WINDOW_WIDTH);
-	int h = glutGet(GLUT_WINDOW_HEIGHT);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glOrtho(0.0f, w, h, 0.0f, 0.0f, 1.0f);
-	glPushMatrix();
-		glColor3f(0, 0, 0);
-		int x = 10; int y = 30;
-
-		i++;
-		infoString = "Update number: " + to_string(i);
-		printText(x, y, (char*)infoString.c_str());
-
-		y+=30;
-		infoString = "Curr. position: " + 
-		string("X:") + to_string((float)carHolder->_pos_X) +
-		string(" Y:") + to_string((float)carHolder->_pos_Y) + 
-		string(" Z:") + to_string((float)carHolder->_pos_Z);
-		printText(x, y, (char*)infoString.c_str());
-
-		y+=30;
-		infoString = "Curr. speed: ";
-		printText(x, y, (char*)infoString.c_str());
-
-	glPopMatrix();
-	glutSwapBuffers();
-}
-
-void printText(int x, int y, char *string)
-{
-	int length, i;
-	length = strlen(string);
-	glRasterPos2i(x, y); //find where to start printing (pixel information)
-	for (i = 0; i < length; i++)
-	{
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]); // Print a character of the text on the window
-	}
 }

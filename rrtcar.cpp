@@ -44,6 +44,10 @@ static const char* botdesc[BOTS] = {
 	"rrtcar 6", "rrtcar 7", "rrtcar 8", "rrtcar 9", "rrtcar 10"
 };
 
+DWindow *dwind;
+bool windowCreated = false;
+int i = 0;
+
 /* Module entry point */
 extern "C" int rrtcar(tModInfo *modInfo)
 {
@@ -143,12 +147,19 @@ static void newRace(int index, tCarElt* car, tSituation *situation)
 	mycar[index-1] = new MyCar(myTrackDesc, car, situation);
 
 	currenttime = situation->currentTime;
+
 }
 
 
 /* controls the car */
 static void drive(int index, tCarElt* car, tSituation *situation)
 {
+	if(!windowCreated)
+	{
+		dwind = new DWindow();
+		windowCreated = true;
+	}
+
 	tdble angle;
 	tdble brake;
 	tdble b1;							/* brake value in case we are to fast HERE and NOW */
@@ -160,12 +171,17 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 
 	MyCar* myc = mycar[index-1];
 	Pathfinder* mpf = myc->getPathfinderPtr();
+	dwind->setCarPtr(myc);
 
 	b1 = b2 = b3 = b4 = b5 = 0.0;
 	shiftaccel = 0.0;
 
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
+	i++;
+	string str = to_string(i) + "-" + to_string(dwind->getCarPtr()->getCurrentPos()->x);
+	dwind->setInfoS(str);
+	dwind->Redisplay();
 
 	/* decide how we want to drive */
 	if ( car->_dammage < myc->undamaged/3 && myc->bmode != myc->NORMAL) {

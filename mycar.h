@@ -38,8 +38,6 @@
 #include "trackdesc.h"
 #include "pathfinder.h"
 #include "linalg.h"
-#include "GL/freeglut.h"
-
 
 class Pathfinder;
 class PathSeg;
@@ -171,11 +169,6 @@ class MyCar : public AbstractCar
 		inline double getErrorSgn() { return derrorsgn; }
 		inline Pathfinder* getPathfinderPtr() { return pf; }
 
-		//Debug GL window
-		void initGLUTWindow();
-		void GLUTWindowRedisplay();
-		void destroyGLUTWindow();
-
 	private:
 		enum { DRWD = 0, DFWD = 1, D4WD = 2 };
 
@@ -205,15 +198,4 @@ class OtherCar: public AbstractCar
 		double dt;
 };
 
-/*************************************************
- * 		GLOBAL SUPPORT FUNCTIONS				 *
- * **********************************************/
-
-/*************************
- *  DEBUG GL WINDOW 	 *
- * **********************/
-void drawCurrStats();
-void printText(int x, int y, char *string);
-
-#endif // _MYCAR_H_
-
+#endif

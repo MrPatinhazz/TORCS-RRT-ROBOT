@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <cstring>
 #include <iostream>
+#include <vector>
 
 #include <tgf.h>
 #include <track.h>
@@ -37,6 +38,7 @@
 #include "mycar.h"
 #include "pathfinder.h"
 #include "dwindow.h"
+#include "state.hpp"
 
 #define TRACKFILENAME		"/home/berni/track.dat"
 #define TRACKDESCFILENAME   "/home/berni/track.txt"

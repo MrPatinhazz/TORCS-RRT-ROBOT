@@ -20,6 +20,10 @@
 #ifndef _LINALG_H_
 #define _LINALG_H_
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
 class v3d {
 	public:
 		double x, y, z;		/* coordinates */

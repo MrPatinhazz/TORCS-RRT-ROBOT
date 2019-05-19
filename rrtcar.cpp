@@ -47,6 +47,8 @@ static const char* botdesc[BOTS] = {
 DWindow *dwind;
 bool windowCreated = false;
 int i = 0;
+double xpos, ypos, zpos;
+vector <State> tree;
 
 /* Module entry point */
 extern "C" int rrtcar(tModInfo *modInfo)
@@ -88,6 +90,7 @@ static const tdble waitToTurn = 1.0; /* how long should i wait till i try to tur
 
 /* release resources when the module gets unloaded */
 static void shutdown(int index) {
+
 	int i = index - 1;
 	if (mycar[i] != NULL) {
 		delete mycar[i];
@@ -101,6 +104,14 @@ static void shutdown(int index) {
 		delete [] ocar;
 		ocar = NULL;
 	}
+	if (dwind != NULL)
+	{
+		delete dwind;
+	}
+	for (auto it = tree.begin(); it != tree.end(); it++) 
+        cout << to_string(it->getPos()->x) << endl;
+
+	tree.clear();
 }
 
 
@@ -178,9 +189,20 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
-	i++;
-	string str = to_string(i) + "-" + to_string(dwind->getCarPtr()->getCurrentPos()->x);
+	xpos = dwind->getCarPtr()->getCurrentPos()->x;
+	ypos = dwind->getCarPtr()->getCurrentPos()->y;
+	zpos = dwind->getCarPtr()->getCurrentPos()->z;
+	string str = to_string(i) + "-"+ "X:" + to_string(xpos) + " Y:" + to_string(ypos) + " Z:" + to_string(zpos);
 	dwind->setInfoS(str);
+
+	i++;
+	if(i%200==0)
+	{
+		State st = State(myc->getCurrentPos());
+		//st.toString();
+		tree.push_back(st);
+	};
+
 	dwind->Redisplay();
 
 	/* decide how we want to drive */

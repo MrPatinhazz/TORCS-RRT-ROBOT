@@ -9,31 +9,33 @@
 #include "car.h"
 #include <iostream>
 #include <string>
+#include "linalg.h"
+
+using namespace std;
 
 class State
 {
     private:
-        tPosd pos;
-
+        v3d pos;
         int graphIndex;
         int parentGIndex;
 
-
     public:
-    float distFromStart = 0;
         State();
-        State(tPosd pos);
+        State(v3d *pos);
+        ~State();
 
-        tPosd getPos();
-        void setPos(tPosd pos);
+        v3d* getPos(){return &pos;};
+        void setPos(v3d pos);
 
-        int getGraphIndex();
+        int getGraphIndex(){return graphIndex;};
         void setGraphIndex(int index);
 
-        int getParentGIndex();
+        int getParentGIndex(){return parentGIndex;};
         void setParentGIndex(int index);
 
-        std::string toString();
+        void toString();
+        float distFromStart = 0;
 
 };
 

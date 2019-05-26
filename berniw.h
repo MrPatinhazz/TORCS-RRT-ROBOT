@@ -38,7 +38,8 @@
 #include "mycar.h"
 #include "pathfinder.h"
 #include "dwindow.h"
-#include "state.hpp"
+#include "state.h"
+#include "rrt.h"
 
 #define TRACKFILENAME		"/home/berni/track.dat"
 #define TRACKDESCFILENAME   "/home/berni/track.txt"

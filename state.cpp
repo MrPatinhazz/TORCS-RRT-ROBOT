@@ -1,4 +1,4 @@
-#include "state.hpp"
+#include "state.h"
 
 State::State()
 {
@@ -22,6 +22,8 @@ State::~State()
 
 void State::toString()
 {
-    cout<< "Current Pos" <<endl;
-    cout << to_string(pos.x);
+    cout<< "Current Pos :" << endl;
+    cout << "X:"  << pos.x;
+    cout << " Y:" << pos.y;
+    cout << " Z:" << pos.z << endl;
 }

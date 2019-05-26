@@ -10,33 +10,44 @@
 #include <cstring>
 #include "GL/freeglut.h"
 #include "mycar.h"
+#include "rrt.h"
 
 using namespace std;
 
 class DWindow
 {
     public:
-        DWindow();
+        DWindow(int w, int h, MyCar *mcar, RRT *mrrt);
         ~DWindow();
         void Redisplay();
-        void setCarPtr(MyCar *car){wCar = car;};
-        MyCar* getCarPtr(){return wCar;};
+
+        void setCarPtr(MyCar *mcar){infoCar = mcar;};
+        MyCar* getCarPtr(){return infoCar;};
+
+        void setRRTPtr(RRT *mrrt){inforrt = mrrt;};
+        RRT* getRRTPtr(){return inforrt;};
+
         string getInfoS(){return infoS;};
         void setInfoS(string str){infoS = str;};
 
     private:
         int statsInt = 0;
         string infoS = "";
-        MyCar *wCar;        
-        
+        int pathInt = 0;
+        MyCar *infoCar;
+        RRT *inforrt;        
 };
 
-void drawWindow();
+//Stats Window display refresh and text render
+void drawWindowStats();
 void printText(int x, int y, char *string);
-void drawSearchPoints();
+
+//Path window display refresh and drawings render
+void drawWindowPath();
 void draw2DProjectedSearchPoints(); //for printing projected state space
 void drawMapSegments();
 void drawCircle(tPosd point, GLfloat radius);
+void drawCircle(v3d pos, GLfloat radius);
 void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY);
 void drawCubicBezier(tPosd p0, tPosd p1, tPosd p2, tPosd p3, unsigned int numPartialPoints);
 GLuint loadTexture(const char * filename);

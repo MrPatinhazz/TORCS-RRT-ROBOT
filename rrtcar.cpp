@@ -44,11 +44,12 @@ static const char* botdesc[BOTS] = {
 	"rrtcar 6", "rrtcar 7", "rrtcar 8", "rrtcar 9", "rrtcar 10"
 };
 
-DWindow *dwind;
+static DWindow *dwind = NULL;
+static RRT *myRRT = NULL;
 bool windowCreated = false;
-int i = 0;
-double xpos, ypos, zpos;
-vector <State> tree;
+int i,j = 0;
+vector<State>::iterator it;
+double xpos = 0, ypos = 0, zpos = 0;
 
 /* Module entry point */
 extern "C" int rrtcar(tModInfo *modInfo)
@@ -108,10 +109,10 @@ static void shutdown(int index) {
 	{
 		delete dwind;
 	}
-	for (auto it = tree.begin(); it != tree.end(); it++) 
-        cout << to_string(it->getPos()->x) << endl;
-
-	tree.clear();
+	if (myRRT != NULL)
+	{
+		delete myRRT;
+	}
 }
 
 
@@ -158,6 +159,9 @@ static void newRace(int index, tCarElt* car, tSituation *situation)
 	mycar[index-1] = new MyCar(myTrackDesc, car, situation);
 
 	currenttime = situation->currentTime;
+	
+	//Initializes RRT class. Holds the tree (state vector) and iteration information
+	myRRT = new RRT();
 
 }
 
@@ -165,12 +169,6 @@ static void newRace(int index, tCarElt* car, tSituation *situation)
 /* controls the car */
 static void drive(int index, tCarElt* car, tSituation *situation)
 {
-	if(!windowCreated)
-	{
-		dwind = new DWindow();
-		windowCreated = true;
-	}
-
 	tdble angle;
 	tdble brake;
 	tdble b1;							/* brake value in case we are to fast HERE and NOW */
@@ -182,7 +180,15 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 
 	MyCar* myc = mycar[index-1];
 	Pathfinder* mpf = myc->getPathfinderPtr();
-	dwind->setCarPtr(myc);
+
+	//Creates the Stats and path window
+	if(!windowCreated)
+	{
+		int _w = (myTrackDesc->getTorcsTrack()->max.x) - (myTrackDesc->getTorcsTrack()->min.x);
+		int _h = (myTrackDesc->getTorcsTrack()->max.y) - (myTrackDesc->getTorcsTrack()->min.y);
+		dwind = new DWindow(_w, _h, myc, myRRT);
+		windowCreated = true;
+	}
 
 	b1 = b2 = b3 = b4 = b5 = 0.0;
 	shiftaccel = 0.0;
@@ -198,9 +204,13 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	i++;
 	if(i%200==0)
 	{
+		j++;
 		State st = State(myc->getCurrentPos());
-		//st.toString();
-		tree.push_back(st);
+		myRRT->addState(st);
+		for(it = myRRT->getSVec().begin(); it != myRRT->getSVec().end(); it++)
+		{
+			it->toString();
+		}
 	};
 
 	dwind->Redisplay();

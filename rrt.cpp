@@ -1,11 +1,14 @@
-#include "rrt.hpp"
+#include "rrt.h"
 
-RRT::RRT(State rootState)
+RRT::RRT()
 {
-    this->rootState = new State();
+    nIter = -1;
+    rootState = nullptr;
+    stateVec = {};
 }
 
 RRT::~RRT()
 {
-
+    stateVec.clear;
 }
+

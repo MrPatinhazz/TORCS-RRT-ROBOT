@@ -3,6 +3,8 @@
 static string infoString;
 MyCar *_mycar;
 RRT *_myrrt;
+vector<State>::iterator it;
+float _scale = 0.5;
 
 DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt)
 {
@@ -14,25 +16,22 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt)
 	_mycar = infoCar = mcar;
 	_myrrt = inforrt = mrrt;
 
-	glutInitWindowSize(600, 300);
+	glutInitWindowSize(600,300);
 	statsInt = glutCreateWindow("Stats");
 	glutPositionWindow(720,0);
 	glutDisplayFunc(drawWindowStats);
 
-	/*
-	glutInitWindowSize(w,h);
+	glutInitWindowSize(w*_scale,h*_scale);
 	pathInt = glutCreateWindow("Drawing path");
-	glutPositionWindow(0,0);
+	glutPositionWindow(720,200);
 	glutDisplayFunc(drawWindowPath);
-	*/
+	
 }
 
 DWindow::~DWindow()
 {
     glutDestroyWindow(statsInt);
-	/*
 	glutDestroyWindow(pathInt);
-	*/
 }
 
 void DWindow::Redisplay()
@@ -42,10 +41,10 @@ void DWindow::Redisplay()
 
 	glutSetWindow(statsInt);
 	glutPostRedisplay();
-	/*
+
 	glutSetWindow(pathInt);
 	glutPostRedisplay();
-	*/
+
 	glutSetWindow(gameplayWindow);
 }
 
@@ -107,11 +106,21 @@ void drawWindowPath()
 	//Draws car current position every frame
 	drawCircle(_mycar->getCarPtr()->pub.DynGCg.pos,5);
 
-	//for all nodes in RRT->tree
-	for (auto it = _myrrt->getSVec().begin(); it != _myrrt->getSVec().end(); it++)
+	glColor3f(1,0,1);
+
+	/*
+	if(!_myrrt->getSVec().empty())
 	{
-		cout<< "X: " << it->getPos().x << "Y: " << it->getPos().y<< "Z: " << it->getPos().z << endl;
-		drawCircle(it->getPos(),5);
+		drawCircle(_myrrt->getSVec().back().getPos(),5);
+		_myrrt->getSVec().back().toString();
+	}*/
+	
+	if(!_myrrt->getSVec().empty())
+	{
+		for(it = _myrrt->getSVec().begin(); it != _myrrt->getSVec().end(); it++)
+		{
+			drawCircle(it->getPos(),3);
+		}
 	}
 	//Draw map segments
 
@@ -125,8 +134,8 @@ void drawCircle(tPosd point, GLfloat radius)
 {
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 
-	int x = point.x;
-	int y = h - point.y;
+	int x = (point.x * _scale);
+	int y = h - (point.y * _scale);
 
 	int i;
 	int triangleAmount = 30;
@@ -144,12 +153,12 @@ void drawCircle(tPosd point, GLfloat radius)
 	glEnd();
 }
 
-void drawCircle(v3d pos, GLfloat radius)
+void drawCircle(v3d *pos, GLfloat radius)
 {
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 
-	int x = pos.x;
-	int y = h - pos.y;
+	int x = (pos->x * _scale);
+	int y = h - (pos->y * _scale);
 
 	int i;
 	int triangleAmount = 30;

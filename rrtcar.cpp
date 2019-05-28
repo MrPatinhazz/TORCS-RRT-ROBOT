@@ -48,8 +48,8 @@ static DWindow *dwind = NULL;
 static RRT *myRRT = NULL;
 bool windowCreated = false;
 int i,j = 0;
-vector<State>::iterator it;
-double xpos = 0, ypos = 0, zpos = 0;
+vector<State>::iterator vsit;
+v3d *strpos;
 
 /* Module entry point */
 extern "C" int rrtcar(tModInfo *modInfo)
@@ -108,6 +108,7 @@ static void shutdown(int index) {
 	if (dwind != NULL)
 	{
 		delete dwind;
+		windowCreated = false;
 	}
 	if (myRRT != NULL)
 	{
@@ -195,22 +196,21 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
-	xpos = dwind->getCarPtr()->getCurrentPos()->x;
-	ypos = dwind->getCarPtr()->getCurrentPos()->y;
-	zpos = dwind->getCarPtr()->getCurrentPos()->z;
-	string str = to_string(i) + "-"+ "X:" + to_string(xpos) + " Y:" + to_string(ypos) + " Z:" + to_string(zpos);
+	strpos = dwind->getCarPtr()->getCurrentPos();
+	string str = to_string(i) + "-"+ "X:" + to_string(strpos->x) + " Y:" + to_string(strpos->y) + " Z:" + to_string(strpos->z);
 	dwind->setInfoS(str);
 
 	i++;
-	if(i%200==0)
+	if(i%10==0)
 	{
 		j++;
 		State st = State(myc->getCurrentPos());
 		myRRT->addState(st);
-		for(it = myRRT->getSVec().begin(); it != myRRT->getSVec().end(); it++)
+		myRRT->getSVec().back().toString();
+		/*for(vsit = myRRT->getSVec().begin(); vsit != myRRT->getSVec().end(); vsit++)
 		{
-			it->toString();
-		}
+			vsit->toString();
+		}*/
 	};
 
 	dwind->Redisplay();

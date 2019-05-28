@@ -25,7 +25,7 @@ class State
         State(v3d *pos);
         ~State();
 
-        v3d getPos(){return pos;};
+        v3d* getPos(){return &pos;};
         void setPos(v3d pos);
 
         int getGraphIndex(){return graphIndex;};

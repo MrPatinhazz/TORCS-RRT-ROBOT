@@ -18,6 +18,7 @@ class RRT
         State* getRoot(){return rootState;};
         void setRoot(State *_st){rootState = _st;};
 
+        //Unnecessary after the search() method is implemented
         vector<State> getSVec(){return stateVec;};
         void addState(State st){stateVec.push_back(st);};
 

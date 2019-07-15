@@ -1,14 +1,9 @@
 #include "rrt.h"
 
-RRT::RRT()
+void RRT::printPool()
 {
-    nIter = -1;
-    rootState = nullptr;
-    stateVec = {};
+  for(vector<State*>::iterator it = statePool.begin(); it != statePool.end(); it++)
+  {
+      cout<< *it << endl;
+  }
 }
-
-RRT::~RRT()
-{
-    stateVec.clear;
-}
-

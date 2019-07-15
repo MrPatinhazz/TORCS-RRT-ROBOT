@@ -7,7 +7,6 @@
 #pragma once
 
 #include "state.h"
-#include <vector>
 
 class RRT
 {
@@ -15,18 +14,14 @@ class RRT
         RRT(){}
         ~RRT(){}
 
-        State* getRoot(){return rootState;};
-        void setRoot(State *_st){rootState = _st;};
+        vector <State*> getStatePool(){return statePool;};
+        void addToPool(State* newState){statePool.push_back(newState);};
+        void printPool();
 
-        //Unnecessary after the search() method is implemented
-        vector<State> getSVec(){return stateVec;};
-        void addState(State st){stateVec.push_back(st);};
-
-        int getIter(){return nIter;};
-        void incrIter(){nIter++;};
+        //Adiciona state a pool
+        //Remove state da pool
 
     private:
-        int nIter;
-        State* rootState;
-        vector<State> stateVec;
+        //Pool de todos os estados criados - inclui ligados e nao ligados
+        vector <State*> statePool;
 };

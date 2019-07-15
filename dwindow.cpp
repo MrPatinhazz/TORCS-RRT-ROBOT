@@ -2,11 +2,9 @@
 
 static string infoString;
 MyCar *_mycar;
-RRT *_myrrt;
-vector<State>::iterator it;
 float _scale = 0.5;
 
-DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt)
+DWindow::DWindow(int w, int h, MyCar *mcar)
 {
     glutSetOption(
 		GLUT_ACTION_ON_WINDOW_CLOSE,
@@ -14,7 +12,6 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt)
 	);
 
 	_mycar = infoCar = mcar;
-	_myrrt = inforrt = mrrt;
 
 	glutInitWindowSize(600,300);
 	statsInt = glutCreateWindow("Stats");
@@ -107,21 +104,6 @@ void drawWindowPath()
 	drawCircle(_mycar->getCarPtr()->pub.DynGCg.pos,5);
 
 	glColor3f(1,0,1);
-
-	/*
-	if(!_myrrt->getSVec().empty())
-	{
-		drawCircle(_myrrt->getSVec().back().getPos(),5);
-		_myrrt->getSVec().back().toString();
-	}*/
-	
-	if(!_myrrt->getSVec().empty())
-	{
-		for(it = _myrrt->getSVec().begin(); it != _myrrt->getSVec().end(); it++)
-		{
-			drawCircle(it->getPos(),3);
-		}
-	}
 	//Draw map segments
 
 	//DRAWING CYCLE

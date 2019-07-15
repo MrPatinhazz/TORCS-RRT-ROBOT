@@ -10,22 +10,18 @@
 #include <cstring>
 #include "GL/freeglut.h"
 #include "mycar.h"
-#include "rrt.h"
 
 using namespace std;
 
 class DWindow
 {
     public:
-        DWindow(int w, int h, MyCar *mcar, RRT *mrrt);
+        DWindow(int w, int h, MyCar *mcar);
         ~DWindow();
         void Redisplay();
 
         void setCarPtr(MyCar *mcar){infoCar = mcar;};
         MyCar* getCarPtr(){return infoCar;};
-
-        void setRRTPtr(RRT *mrrt){inforrt = mrrt;};
-        RRT* getRRTPtr(){return inforrt;};
 
         string getInfoS(){return infoS;};
         void setInfoS(string str){infoS = str;};
@@ -34,8 +30,7 @@ class DWindow
         int statsInt = 0;
         string infoS = "";
         int pathInt = 0;
-        MyCar *infoCar;
-        RRT *inforrt;        
+        MyCar *infoCar;       
 };
 
 //Stats Window display refresh and text render

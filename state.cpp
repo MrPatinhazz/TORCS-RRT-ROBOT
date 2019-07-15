@@ -3,17 +3,9 @@
 State::State()
 {
     pos = v3d(0,0,0);
-    graphIndex = -1;
-    parentGIndex = -1;
-    distFromStart = -1;
-}
-
-State::State(v3d *tpos)
-{
-    pos = *tpos;
-    graphIndex = -1;
-    parentGIndex = -1;
-    distFromStart = -1;
+    graphIndex = 0;
+    parent = nullptr;
+    children = {};
 }
 
 State::~State()

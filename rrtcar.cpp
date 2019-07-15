@@ -45,11 +45,9 @@ static const char* botdesc[BOTS] = {
 };
 
 static DWindow *dwind = NULL;
-static RRT *myRRT = NULL;
-bool windowCreated = false;
-int i,j = 0;
-vector<State>::iterator vsit;
-v3d *strpos;
+v3d *strpos = {};
+bool windowCreated;
+int i = 0;
 
 /* Module entry point */
 extern "C" int rrtcar(tModInfo *modInfo)
@@ -81,13 +79,11 @@ static int InitFuncPt(int index, void *pt)
 	return 0;
 }
 
-
 static MyCar* mycar[BOTS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 static OtherCar* ocar = NULL;
 static TrackDesc* myTrackDesc = NULL;
 static double currenttime;
 static const tdble waitToTurn = 1.0; /* how long should i wait till i try to turn backwards */
-
 
 /* release resources when the module gets unloaded */
 static void shutdown(int index) {
@@ -109,10 +105,6 @@ static void shutdown(int index) {
 	{
 		delete dwind;
 		windowCreated = false;
-	}
-	if (myRRT != NULL)
-	{
-		delete myRRT;
 	}
 }
 
@@ -160,10 +152,6 @@ static void newRace(int index, tCarElt* car, tSituation *situation)
 	mycar[index-1] = new MyCar(myTrackDesc, car, situation);
 
 	currenttime = situation->currentTime;
-	
-	//Initializes RRT class. Holds the tree (state vector) and iteration information
-	myRRT = new RRT();
-
 }
 
 
@@ -187,7 +175,7 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	{
 		int _w = (myTrackDesc->getTorcsTrack()->max.x) - (myTrackDesc->getTorcsTrack()->min.x);
 		int _h = (myTrackDesc->getTorcsTrack()->max.y) - (myTrackDesc->getTorcsTrack()->min.y);
-		dwind = new DWindow(_w, _h, myc, myRRT);
+		dwind = new DWindow(_w, _h, myc);
 		windowCreated = true;
 	}
 
@@ -197,22 +185,9 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
 	strpos = dwind->getCarPtr()->getCurrentPos();
-	string str = to_string(i) + "-"+ "X:" + to_string(strpos->x) + " Y:" + to_string(strpos->y) + " Z:" + to_string(strpos->z);
-	dwind->setInfoS(str);
-
 	i++;
-	if(i%10==0)
-	{
-		j++;
-		State st = State(myc->getCurrentPos());
-		myRRT->addState(st);
-		myRRT->getSVec().back().toString();
-		/*for(vsit = myRRT->getSVec().begin(); vsit != myRRT->getSVec().end(); vsit++)
-		{
-			vsit->toString();
-		}*/
-	};
-
+	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z);
+	dwind->setInfoS(str);
 	dwind->Redisplay();
 
 	/* decide how we want to drive */
@@ -244,7 +219,7 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 
 	/* clear ctrl structure with zeros and set the current gear */
-	memset(&car->ctrl, 0, sizeof(tCarCtrl));
+	std::memset(&car->ctrl, 0, sizeof(tCarCtrl));
 	car->_gearCmd = car->_gear;
 
 	/* uncommenting the following line causes pitstop on every lap */

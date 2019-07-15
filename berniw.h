@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <cstring>
 #include <iostream>
 #include <vector>
@@ -95,6 +96,12 @@ inline double radius(double x1, double y1, double x2, double y2, double x3, doub
 	} else {
 		return FLT_MAX;
 	}
+}
+
+inline double fRand(double fMin, double fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
 }
 
 #endif // _BERNIW_H_

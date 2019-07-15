@@ -1,5 +1,77 @@
-Detetar onde é feita a ultrapassagem e imprimir mensagem
+Por agora a root e o goal sao escolhidos aleatoriamente.
+Proximo passo sera ligar ambos a partir de uma RRT, inicialmente unidirecional com expansao completa num frame? ou uma expansao por frame
+    1)Pesquisar o RRT
 
-Construir a classe RRT e implementar um teste inicial onde é construída uma árvore no início da pista
+************* SCRAPS ******************
 
-Desenhar a árvore construída utilizando a debug window. Já imprime texto mas ainda não desenha formas
+
+    	if(i%50 == 0 && !hasRoot)
+	{
+		myRRT->setKnodes(10);
+		hasRoot = true;
+		tTrack *_myT = myTrackDesc->getTorcsTrack();
+		double randx = fRand(_myT->min.x, _myT->max.x);
+		double randy = fRand(_myT->min.y, _myT->max.y);
+		double _maxz = _myT->max.z;
+		v3d randroot = v3d(randx,randy,_maxz);	
+		cout << randroot.x << endl;
+	}
+	if(i%100 == 0 && !hasGoal)
+	{
+		hasGoal = true;
+		tTrack *_myT = myTrackDesc->getTorcsTrack();
+		double randx = fRand(_myT->min.x, _myT->max.x);
+		double randy = fRand(_myT->min.y, _myT->max.y);
+		double _maxz = _myT->max.z;
+		v3d randgoal = v3d(randx,randy,_maxz);
+		cout << randgoal.x << endl;	
+	}
+
+
+
+    ////////////////////////////////////////
+
+
+    class RRT
+{
+    public:
+        RRT(){}
+        ~RRT(){}
+
+        
+
+        State* getRoot(){return rootState;};
+        void setRoot(State *_st){rootState = _st;};
+
+        State* getGoal(){return goalState;};
+        void setGoal(State *_st){goalState = _st;};
+
+        //Unnecessary after the search() method is implemented
+        vector<State> getSVec(){return stateVec;};
+        void addState(State st){stateVec.push_back(st);};
+
+        int getIter(){return nIter;};
+        void incrIter(){nIter++;};
+
+        int getKnodes(){return knodes;};
+        void setKnodes(int k){knodes = k;};
+
+        void genRandState(v3d xfree);
+
+    private:
+        int nIter;
+        int knodes;
+        State* rootState;
+        State* goalState;
+        vector<State> stateVec;
+};
+
+///////////////////////////////////////////////////////////////
+
+	if(!_myrrt->getSVec().empty())
+	{
+		for(it = _myrrt->getSVec().begin(); it != _myrrt->getSVec().end(); it++)
+		{
+			drawCircle(it->getPos(),3);
+		}
+	}

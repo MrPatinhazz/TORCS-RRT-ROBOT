@@ -7,6 +7,7 @@
 #pragma once
 
 #include "car.h"
+#include <vector>
 #include <iostream>
 #include <string>
 #include "linalg.h"
@@ -18,24 +19,21 @@ class State
     private:
         v3d pos;
         int graphIndex;
-        int parentGIndex;
+        State* parent;
+        vector <State*> children;
 
     public:
         State();
-        State(v3d *pos);
+        State(v3d pos);
         ~State();
 
-        v3d* getPos(){return &pos;};
+        v3d getPos(){return pos;};
         void setPos(v3d pos);
 
         int getGraphIndex(){return graphIndex;};
         void setGraphIndex(int index);
 
-        int getParentGIndex(){return parentGIndex;};
-        void setParentGIndex(int index);
-
         void toString();
         float distFromStart = 0;
-
 };
 

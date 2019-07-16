@@ -44,11 +44,6 @@ static const char* botdesc[BOTS] = {
 	"rrtcar 6", "rrtcar 7", "rrtcar 8", "rrtcar 9", "rrtcar 10"
 };
 
-static DWindow *dwind = NULL;
-v3d *strpos = {};
-bool windowCreated;
-int i = 0;
-
 /* Module entry point */
 extern "C" int rrtcar(tModInfo *modInfo)
 {
@@ -64,7 +59,6 @@ extern "C" int rrtcar(tModInfo *modInfo)
 	return 0;
 }
 
-
 /* initialize function (callback) pointers for torcs */
 static int InitFuncPt(int index, void *pt)
 {
@@ -78,6 +72,12 @@ static int InitFuncPt(int index, void *pt)
 	itf->index      = index;
 	return 0;
 }
+
+static RRT *myrrt = NULL;
+static DWindow *dwind = NULL;
+v3d *strpos = {};
+bool windowCreated;
+int i = 0;
 
 static MyCar* mycar[BOTS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 static OtherCar* ocar = NULL;
@@ -105,6 +105,10 @@ static void shutdown(int index) {
 	{
 		delete dwind;
 		windowCreated = false;
+	}
+	if (myrrt != NULL)
+	{
+		delete myrrt;
 	}
 }
 
@@ -136,6 +140,9 @@ static void initTrack(int index, tTrack* track, void *carHandle, void **carParmH
 		(char*)NULL, track->length*MyCar::MAX_FUEL_PER_METER);
 	fuel *= (situation->_totLaps + 1.0);
 	GfParmSetNum(*carParmHandle, SECT_CAR, PRM_FUEL, (char*)NULL, MIN(fuel, 100.0));
+
+	// Creates the single RRT with empty pool
+	myrrt = new RRT;
 }
 
 
@@ -184,11 +191,18 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
-	strpos = dwind->getCarPtr()->getCurrentPos();
-	i++;
+
+	strpos = dwind->getCarPtr()->getCurrentPos(); i++;
 	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z);
-	dwind->setInfoS(str);
-	dwind->Redisplay();
+	dwind->setInfoS(str); dwind->Redisplay();
+
+	if(i%300 == 0)
+	{
+		State newState = new State();
+		cout << &newState << endl;
+		myrrt->addToPool(&newState);
+		cout << "State added" << endl;
+	}
 
 	/* decide how we want to drive */
 	if ( car->_dammage < myc->undamaged/3 && myc->bmode != myc->NORMAL) {

@@ -203,18 +203,15 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 		double maxz = myTrack->max.z;
 		v3d randpos = v3d(randx,randy,maxz);
 
-		static State newState = State(randpos);
-		myrrt.addToPool(&newState);
+		State* newState = new State(randpos);
+		myrrt.addToPool(*newState);
 		cout << "State added at:" <<
-		"X:"<< newState.getPos().x <<
-		" Y:"<< newState.getPos().y <<
-		" Z:"<< newState.getPos().y <<
+		"X:"<< newState->getPos().x <<
+		" Y:"<< newState->getPos().y <<
+		" Z:"<< newState->getPos().y <<
 		endl;
 		cout << myrrt.getStatePool().data() << endl;
 	}
-
-	if(!myrrt.getStatePool().empty())
-	cout << myrrt.getStatePool().at(0)->getPos().x << endl;
 
 	/* decide how we want to drive */
 	if ( car->_dammage < myc->undamaged/3 && myc->bmode != myc->NORMAL) {

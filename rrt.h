@@ -15,7 +15,7 @@ class RRT
         ~RRT(){}
 
         vector <State*> getStatePool(){return statePool;};
-        void addToPool(State* newState){statePool.push_back(newState);};
+        void addToPool(State &newState){statePool.push_back(&newState);};
         void printPool();
 
         //Remove state da pool

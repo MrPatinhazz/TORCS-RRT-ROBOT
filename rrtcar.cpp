@@ -72,8 +72,7 @@ static int InitFuncPt(int index, void *pt)
 	itf->index      = index;
 	return 0;
 }
-
-RRT* myrrt = nullptr;
+static RRT myrrt = RRT();
 static DWindow* dwind = nullptr;
 tTrack* myTrack = nullptr;
 v3d* strpos = {};
@@ -107,10 +106,6 @@ static void shutdown(int index) {
 		delete dwind;
 		windowCreated = false;
 	}
-	if (myrrt != NULL)
-	{
-		delete myrrt;
-	}
 }
 
 
@@ -141,9 +136,6 @@ static void initTrack(int index, tTrack* track, void *carHandle, void **carParmH
 		(char*)NULL, track->length*MyCar::MAX_FUEL_PER_METER);
 	fuel *= (situation->_totLaps + 1.0);
 	GfParmSetNum(*carParmHandle, SECT_CAR, PRM_FUEL, (char*)NULL, MIN(fuel, 100.0));
-
-	// Creates the single RRT with empty pool
-	myrrt = new RRT;
 
 	//Saves the pointer to Torcs Track
 	myTrack = myTrackDesc->getTorcsTrack(); 
@@ -189,7 +181,7 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
-		dwind = new DWindow(_w, _h, myc, myrrt);
+		dwind = new DWindow(_w, _h, myc, &myrrt);
 		windowCreated = true;
 	}
 
@@ -211,15 +203,18 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 		double maxz = myTrack->max.z;
 		v3d randpos = v3d(randx,randy,maxz);
 
-		State newState = State(randpos);
-		myrrt->addToPool(&newState);
+		static State newState = State(randpos);
+		myrrt.addToPool(&newState);
 		cout << "State added at:" <<
 		"X:"<< newState.getPos().x <<
 		" Y:"<< newState.getPos().y <<
 		" Z:"<< newState.getPos().y <<
 		endl;
-		cout << myrrt->getStatePool().data() << endl;
+		cout << myrrt.getStatePool().data() << endl;
 	}
+
+	if(!myrrt.getStatePool().empty())
+	cout << myrrt.getStatePool().at(0)->getPos().x << endl;
 
 	/* decide how we want to drive */
 	if ( car->_dammage < myc->undamaged/3 && myc->bmode != myc->NORMAL) {

@@ -196,7 +196,7 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z);
 	dwind->setInfoS(str); dwind->Redisplay();
 
-	if(i%300 == 0)
+	if(i%100 == 0)
 	{
 		double randx = fRand(myTrack->min.x, myTrack->max.x);
 		double randy = fRand(myTrack->min.y, myTrack->max.y);

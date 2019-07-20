@@ -110,14 +110,15 @@ void drawWindowPath()
 	//Draws car current position every frame
 	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos,5);
 
+	glColor3f(1,1,0);
+
 	//Draws states position every frame
 	vector <State*> dwPool = dwRRT->getStatePool();
 	if(!dwPool.empty())
-	{;
-		drawCircle(dwPool[dwPool.size()-1]->getPos(),5);
+	{
 		for(vector<State*>::size_type j = 0; j < dwPool.size(); j++)
 		{
-			drawCircle(dwPool[j]->getPos(),5);
+			drawCircle(dwPool[j]->getPos(),4);
 		}
 	}
 

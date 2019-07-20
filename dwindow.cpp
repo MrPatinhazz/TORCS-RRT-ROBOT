@@ -1,17 +1,24 @@
+//Some functions need to be friended by dwindow class in order to them use the mcar variable
+//Watch friend by newboston
+
 #include "dwindow.h"
 
 static string infoString;
-MyCar *_mycar;
 float _scale = 0.5;
+MyCar* dwCar;
+RRT* dwRRT;
 
-DWindow::DWindow(int w, int h, MyCar *mcar)
+DWindow::DWindow(int w, int h, MyCar* mcar, RRT* mrrt)
 {
     glutSetOption(
 		GLUT_ACTION_ON_WINDOW_CLOSE,
 		GLUT_ACTION_CONTINUE_EXECUTION
 	);
 
-	_mycar = infoCar = mcar;
+	infoCar = mcar;
+	dwCar = infoCar;
+
+	dwRRT = mrrt;
 
 	glutInitWindowSize(600,300);
 	statsInt = glutCreateWindow("Stats");
@@ -101,7 +108,10 @@ void drawWindowPath()
 	glColor3f(1,0,1);
 
 	//Draws car current position every frame
-	drawCircle(_mycar->getCarPtr()->pub.DynGCg.pos,5);
+	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos,5);
+
+	//Draws every state position
+	
 
 	glColor3f(1,0,1);
 	//Draw map segments
@@ -135,12 +145,14 @@ void drawCircle(tPosd point, GLfloat radius)
 	glEnd();
 }
 
-void drawCircle(v3d *pos, GLfloat radius)
+void drawCircleP(v3d pos, GLfloat radius)
 {
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 
-	int x = (pos->x * _scale);
-	int y = h - (pos->y * _scale);
+	int x = (pos.x * _scale);
+	cout << pos.x;
+	int y = h - (pos.y * _scale);
+	cout << pos.x << endl;
 
 	int i;
 	int triangleAmount = 30;

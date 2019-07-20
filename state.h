@@ -24,7 +24,7 @@ class State
 
     public:
         State();
-        State(v3d pos);
+        State(v3d npos);
         ~State();
 
         v3d getPos(){return pos;};

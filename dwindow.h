@@ -10,17 +10,18 @@
 #include <cstring>
 #include "GL/freeglut.h"
 #include "mycar.h"
+#include "rrt.h"
 
 using namespace std;
 
 class DWindow
 {
     public:
-        DWindow(int w, int h, MyCar *mcar);
+        DWindow(int w, int h, MyCar*, RRT*);
         ~DWindow();
         void Redisplay();
 
-        void setCarPtr(MyCar *mcar){infoCar = mcar;};
+        void setCarPtr(MyCar* mcar){infoCar = mcar;};
         MyCar* getCarPtr(){return infoCar;};
 
         string getInfoS(){return infoS;};
@@ -30,7 +31,7 @@ class DWindow
         int statsInt = 0;
         string infoS = "";
         int pathInt = 0;
-        MyCar *infoCar;       
+        MyCar* infoCar;
 };
 
 //Stats Window display refresh and text render
@@ -42,7 +43,7 @@ void drawWindowPath();
 void draw2DProjectedSearchPoints(); //for printing projected state space
 void drawMapSegments();
 void drawCircle(tPosd point, GLfloat radius);
-void drawCircle(v3d *pos, GLfloat radius);
+void drawCircleP(v3d pos, GLfloat radius);
 void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY);
 void drawCubicBezier(tPosd p0, tPosd p1, tPosd p2, tPosd p3, unsigned int numPartialPoints);
 GLuint loadTexture(const char * filename);

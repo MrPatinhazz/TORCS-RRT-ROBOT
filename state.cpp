@@ -8,6 +8,14 @@ State::State()
     children = {};
 }
 
+State::State(v3d npos)
+{
+    pos = npos;
+    graphIndex = 0;
+    parent = nullptr;
+    children = {};
+}
+
 State::~State()
 {
 }

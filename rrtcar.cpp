@@ -73,9 +73,10 @@ static int InitFuncPt(int index, void *pt)
 	return 0;
 }
 
-static RRT *myrrt = NULL;
-static DWindow *dwind = NULL;
-v3d *strpos = {};
+RRT* myrrt = nullptr;
+static DWindow* dwind = nullptr;
+tTrack* myTrack = nullptr;
+v3d* strpos = {};
 bool windowCreated;
 int i = 0;
 
@@ -143,6 +144,12 @@ static void initTrack(int index, tTrack* track, void *carHandle, void **carParmH
 
 	// Creates the single RRT with empty pool
 	myrrt = new RRT;
+
+	//Saves the pointer to Torcs Track
+	myTrack = myTrackDesc->getTorcsTrack(); 
+
+	//start seed
+	srand(time(0));
 }
 
 
@@ -180,9 +187,9 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	//Creates the Stats and path window
 	if(!windowCreated)
 	{
-		int _w = (myTrackDesc->getTorcsTrack()->max.x) - (myTrackDesc->getTorcsTrack()->min.x);
-		int _h = (myTrackDesc->getTorcsTrack()->max.y) - (myTrackDesc->getTorcsTrack()->min.y);
-		dwind = new DWindow(_w, _h, myc);
+		int _w = (myTrack->max.x) - (myTrack->min.x);
+		int _h = (myTrack->max.y) - (myTrack->min.y);
+		dwind = new DWindow(_w, _h, myc, myrrt);
 		windowCreated = true;
 	}
 
@@ -192,16 +199,26 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
 
+	//Updates debug window string information
 	strpos = dwind->getCarPtr()->getCurrentPos(); i++;
 	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z);
 	dwind->setInfoS(str); dwind->Redisplay();
 
 	if(i%300 == 0)
 	{
-		State newState = new State();
-		cout << &newState << endl;
+		double randx = fRand(myTrack->min.x, myTrack->max.x);
+		double randy = fRand(myTrack->min.y, myTrack->max.y);
+		double maxz = myTrack->max.z;
+		v3d randpos = v3d(randx,randy,maxz);
+
+		State newState = State(randpos);
 		myrrt->addToPool(&newState);
-		cout << "State added" << endl;
+		cout << "State added at:" <<
+		"X:"<< newState.getPos().x <<
+		" Y:"<< newState.getPos().y <<
+		" Z:"<< newState.getPos().y <<
+		endl;
+		cout << myrrt->getStatePool().data() << endl;
 	}
 
 	/* decide how we want to drive */

@@ -18,7 +18,6 @@ class RRT
         void addToPool(State* newState){statePool.push_back(newState);};
         void printPool();
 
-        //Adiciona state a pool
         //Remove state da pool
 
     private:

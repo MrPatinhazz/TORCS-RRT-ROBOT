@@ -109,8 +109,9 @@ void drawWindowPath()
 
 	//Draws car current position every frame
 	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos,5);
-
-	//Draws every state position
+	if(!dwRRT->getStatePool().empty())
+	drawCircle(dwRRT->getStatePool().at(0)->getPos(),5);
+		//Draws every state position
 	
 
 	glColor3f(1,0,1);
@@ -145,14 +146,12 @@ void drawCircle(tPosd point, GLfloat radius)
 	glEnd();
 }
 
-void drawCircleP(v3d pos, GLfloat radius)
+void drawCircle(v3d pos, GLfloat radius)
 {
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 
 	int x = (pos.x * _scale);
-	cout << pos.x;
 	int y = h - (pos.y * _scale);
-	cout << pos.x << endl;
 
 	int i;
 	int triangleAmount = 30;

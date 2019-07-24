@@ -1,4 +1,2 @@
-Por agora os nodos sao criados em posiçoes aleatorias e sao todos adicionados no momento da criação à State pool do RRT.
-o rrt é passado para a dwindow e todos os nodos presentes na state pool desse rrt são desenhados.
-
-Objetivo : verificar se o ponto criado encontra-se dentro da pista (em Xfree) e adicioná-lo à pool apenas se esse requisito se cumprir.
+Os nodos agora são criados obrigatoriamente dentro da pista. 
+Proximo passo será limitar a criaçao de modos a uma área (um quadrado) de forma a criar uma possível linha mais fiável.

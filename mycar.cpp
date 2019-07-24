@@ -182,20 +182,18 @@ void MyCar::update(TrackDesc* track, tCarElt* car, tSituation *situation)
 	updateDir();
 	updateSpeedSqr();
 	updateSpeed();
-	//PRINTING INFO
-	//info();
 	
 	/* update currentsegment and destination segment id's */
 	int searchrange = MAX((int) ceil(situation->deltaTime*speed+1.0) * 2, 4);
 	currentsegid = destsegid = pf->getCurrentSegment(car, searchrange);
 	double l = 0.0;
-
 	while (l < 2.0 * wheelbase) {
 		l = l + pf->getPathSeg(destsegid)->getLength();
 		destsegid = (destsegid + 1 + pf->getnPathSeg()) % pf->getnPathSeg();
 	}
 
 	currentseg = track->getSegmentPtr(currentsegid);
+
 	destseg = track->getSegmentPtr(destsegid);
 	currentpathseg = pf->getPathSeg(currentsegid);
 	updateDError();

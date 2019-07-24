@@ -32,6 +32,7 @@ static void newRace(int index, tCarElt* car, tSituation *situation);
 static int  InitFuncPt(int index, void *pt);
 static int  pitcmd(int index, tCarElt* car, tSituation *s);
 static void shutdown(int index);
+v3d genValidRandPos();
 
 
 static const char* botname[BOTS] = {
@@ -71,13 +72,15 @@ static int InitFuncPt(int index, void *pt)
 	itf->rbPitCmd   = pitcmd;		/* pit command */
 	itf->index      = index;
 	return 0;
+
 }
-static RRT myrrt = RRT();
-static DWindow* dwind = nullptr;
+RRT* myrrt = nullptr;
+DWindow* dwind = nullptr;
 tTrack* myTrack = nullptr;
 v3d* strpos = {};
 bool windowCreated;
-int i = 0;
+int i, searchrange, currentsegid = 0;
+tdble trackWidth = 0;
 
 static MyCar* mycar[BOTS] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 static OtherCar* ocar = NULL;
@@ -105,6 +108,10 @@ static void shutdown(int index) {
 	{
 		delete dwind;
 		windowCreated = false;
+	}
+	if (myrrt != NULL)
+	{
+		delete myrrt;
 	}
 }
 
@@ -137,8 +144,11 @@ static void initTrack(int index, tTrack* track, void *carHandle, void **carParmH
 	fuel *= (situation->_totLaps + 1.0);
 	GfParmSetNum(*carParmHandle, SECT_CAR, PRM_FUEL, (char*)NULL, MIN(fuel, 100.0));
 
-	//Saves the pointer to Torcs Track
-	myTrack = myTrackDesc->getTorcsTrack(); 
+	//Creates RRT with an empty state pool
+	myrrt = new RRT();
+
+	//Saves the pointer to Torcs Track and its width
+	myTrack = myTrackDesc->getTorcsTrack();
 
 	//start seed
 	srand(time(0));
@@ -181,7 +191,7 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
-		dwind = new DWindow(_w, _h, myc, &myrrt);
+		dwind = new DWindow(_w, _h, myc, myrrt, myTrackDesc, mpf);
 		windowCreated = true;
 	}
 
@@ -192,26 +202,28 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	myc->update(myTrackDesc, car, situation);
 
 	//Updates debug window string information
-	strpos = dwind->getCarPtr()->getCurrentPos(); i++;
-	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z);
-	dwind->setInfoS(str); dwind->Redisplay();
+	searchrange = MAX((int) ceil(situation->deltaTime*myc->getSpeed()+1.0) * 2, 4);
+	currentsegid = mpf->getCurrentSegment(myc->getCarPtr(),searchrange);
+	strpos = myc->getCurrentPos(); i++;
+	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z) + "\n" + "-Seg:" + to_string(currentsegid);
+	dwind->setInfoS(str);
 
-	if(i%100 == 0)
-	{
-		double randx = fRand(myTrack->min.x, myTrack->max.x);
-		double randy = fRand(myTrack->min.y, myTrack->max.y);
-		double maxz = myTrack->max.z;
-		v3d randpos = v3d(randx,randy,maxz);
-
-		State* newState = new State(randpos);
-		myrrt.addToPool(*newState);
-		cout << "State added at:" <<
-		"X:"<< newState->getPos().x <<
-		" Y:"<< newState->getPos().y <<
-		" Z:"<< newState->getPos().y <<
-		endl;
-		cout << myrrt.getStatePool().data() << endl;
+	//Random state each i iterations
+	if(i%50 == 0)
+	{	
+		//Generates a random valid position (inside track)
+		v3d vPos = genValidRandPos();
+		//If its valid, its added to the pool;
+		if(vPos.x != 0)
+		{
+			State* newState = new State(vPos);
+			myrrt->addToPool(*newState);
+			cout << "State added at:" << "X:"<< vPos.x <<" Y:"<< vPos.y <<" Z:"<< vPos.z << endl;
+		}
 	}
+
+	//Updates display window
+	dwind->Redisplay();
 
 	/* decide how we want to drive */
 	if ( car->_dammage < myc->undamaged/3 && myc->bmode != myc->NORMAL) {
@@ -486,5 +498,28 @@ static int pitcmd(int index, tCarElt* car, tSituation *s)
 	myc->trtime = 0.0;
 
 	return ROB_PIT_IM; /* return immediately */
+}
+
+/* Support function - generates random valid v3d */
+v3d genValidRandPos()
+{
+	double randx = fRand(myTrack->min.x, myTrack->max.x);
+	double randy = fRand(myTrack->min.y, myTrack->max.y);
+	double maxz = myTrack->max.z;
+	v3d randpos = v3d(randx,randy,maxz);
+
+	int closestid = myTrackDesc->getNearestId(&randpos);
+	double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(randpos.x,randpos.y);
+	double distToBorder = distToPos-myTrack->width;
+	cout << "To border: " << distToBorder <<endl;
+	//< 0 - 2 to account for track margin
+	if(distToBorder < -2)
+	{
+		return randpos;
+	}
+	else
+	{
+		return v3d(0,0,0);
+	}
 }
 

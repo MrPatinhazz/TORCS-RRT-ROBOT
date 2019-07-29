@@ -1,2 +1,37 @@
 Os nodos agora são criados obrigatoriamente dentro da pista. 
 Proximo passo será limitar a criaçao de modos a uma área (um quadrado) de forma a criar uma possível linha mais fiável.
+
+The algorithm that constructs an RRT is shown in Figure 5.
+A simple iteration is performed in which each step attempts
+to extend the RRT by adding a new vertex that is biased by a
+randomly selected state. The EXTEND function, illustrated
+in Figure 6, selects the nearest vertex already in the RRT to
+the given sample state. The “nearest” vertex is chosen according to the metric, ρ. The function NEW_STATE makes
+a motion toward x by applying an input u ∈ U for some time
+increment t. In general, t may be much larger than the
+time increment that is used for numerical integration. t can
+be fixed or selected randomly at each iteration from a range
+of values (0, max ]. The input, u, can be chosen at random
+or be selected by trying all possible inputs and choosing the
+one that yields a new state as close as possible to the sample,
+x (if U is infinite, then a discrete approximation or analytical technique can be used). NEW_STATE also implicitly
+uses the collision detection function to determine whether the
+new state (and all intermediate states) satisfies the global constraints. For many problems, this can be performed quickly
+(“almost constant time”) using incremental distance computation algorithms (Guibas, Hsu, and Zhang 1999; Lin and
+Canny 1991; Mirtich 1997) by storing the relevant invariants
+with each of the RRT vertices. If NEW_STATE is successful,
+the new state and input are represented in xnew and unew, respectively. Three situations can occur: reached, in which the
+new vertex reaches the sample x (for the nonholonomic planning case, we might instead have a threshold, xnew −x < #
+for a small # > 0); advanced, in which a new vertex xnew = x
+is added to the RRT; and trapped, in which NEW_STATE fails
+to produce a state that lies in Xfree
+
+RRT.init(qinit) <- goal state (current car location)
+    for k = 1 to K (or time, choose whats best)
+        qRand = RandConf() <- rand valid state , done
+        qnear = Nearest_Vertex(qRand, Tree) <- pick the nearest point in the tree to expand it later. partially done
+        qNew = NewConf(qRand, qNear, Tree) <- a new state between qRand and qNear , linearlly interpolated
+        Check if its possible to reach the new node before adding it
+        if yes, add vertex(qNew) and add edge(qNear, qNew)
+
+    return tree

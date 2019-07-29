@@ -33,6 +33,16 @@ class State
         int getGraphIndex(){return graphIndex;};
         void setGraphIndex(int index);
 
+        vector <State*> getChildren(){return children;};
+        void addChild(State &childState){children.push_back(&childState);};
+        void printChildren();
+
+        State* getParent(){return parent;};
+        void setParent(State &pState){
+            parent = &pState;
+            this->setGraphIndex(pState.getGraphIndex()+1);
+        };
+
         void toString();
         float distFromStart = 0;
 };

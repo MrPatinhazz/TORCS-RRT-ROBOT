@@ -104,28 +104,49 @@ void drawWindowPath()
 	glLoadIdentity();
 	glPushMatrix();
 	
-	//DRAWING CYCLE
+//DRAWING CYCLE
 	glColor3f(1,0,1);
-
-	//Draws car current position every frame
-	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos,2);
-
-	glColor3f(1,1,0);
-
-	//Draws states position every frame
-	vector <State*> dwPool = dwRRT->getStatePool();
-	if(!dwPool.empty())
-	{
-		for(vector<State*>::size_type j = 0; j < dwPool.size(); j++)
-		{
-			drawCircleP(dwPool[j]->getPos(),2);
-		}
-	}
 
 	//Draw map segments
 	drawMapSegments();
 
-	//DRAWING CYCLE
+	//Draws car current position
+	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos,2);
+
+	//Draws states position and connections
+	vector <State*> dwPool = dwRRT->getStatePool();
+	if(!dwPool.empty())
+	{
+		//Draw start (tree init)
+		glColor3f(0,0,1);
+		drawCircleP(dwPool[0]->getPos(),2);
+
+		//Draw the rest of the tree
+		for(vector<State*>::size_type j = 1; j < dwPool.size(); j++)
+		{
+			glColor3f(1,1,0);
+			drawCircleP(dwPool[j]->getPos(),2);
+
+			//Draws trees connections (edges)
+			glColor3f(1,0,0);
+			vector <State*> sChildren = dwPool[0]->getChildren();
+			cout << sChildren.size()<< endl;
+			if(!sChildren.empty())
+			{
+				for(vector<State*>::size_type k = 0; k < sChildren.size(); k++)
+				{
+					drawLine(dwPool[0],sChildren[k]);
+				}
+			}
+
+		}
+
+	}
+
+	
+
+
+//DRAWING CYCLE
 	
 	glPopMatrix();
 	glutSwapBuffers();
@@ -208,5 +229,31 @@ void drawCircleP(v3d* pos, GLfloat radius)
 			glVertex2f(x, y);
 			glVertex2f(x + (radius * cos(i * twicePi / triangleAmount)), y + (radius * sin(i * twicePi / triangleAmount)));
 		}
+	glEnd();
+}
+
+void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY)
+{
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+
+	glLineWidth(0.5);
+	glBegin(GL_LINES);
+		glVertex2f(initialPointX,h - initialPointY);
+		glVertex2f(finalPointX,h - finalPointY);
+	glEnd();
+}
+
+void drawLine(State* initialS, State* finalS)
+{
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+	double initPointx = initialS->getPos().x;
+	double initPointy = initialS->getPos().y;
+	double finalPointx = finalS->getPos().x;
+	double finalPointy = finalS->getPos().y;
+
+	glLineWidth(0.5);
+	glBegin(GL_LINES);
+		glVertex2f(initPointx,h - initPointy);
+		glVertex2f(finalPointx,h - finalPointy);
 	glEnd();
 }

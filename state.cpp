@@ -27,3 +27,11 @@ void State::toString()
     cout << " Y:" << pos.y;
     cout << " Z:" << pos.z << endl;
 }
+
+void State::printChildren()
+{
+  for(vector <State*>::iterator it = children.begin(); it != children.end(); it++)
+  {
+    (*it)->toString();
+  }
+}

@@ -32,7 +32,11 @@ static void newRace(int index, tCarElt* car, tSituation *situation);
 static int  InitFuncPt(int index, void *pt);
 static int  pitcmd(int index, tCarElt* car, tSituation *s);
 static void shutdown(int index);
+
+//Support function prototypes
 v3d genValidRandPos();
+v3d genRandPos();
+double euclDist(v3d a, v3d b);
 
 
 static const char* botname[BOTS] = {
@@ -74,11 +78,12 @@ static int InitFuncPt(int index, void *pt)
 	return 0;
 
 }
+
 RRT* myrrt = nullptr;
 DWindow* dwind = nullptr;
 tTrack* myTrack = nullptr;
 v3d* strpos = {};
-bool windowCreated;
+bool windowCreated, treeInit = false;
 int i, searchrange, currentsegid = 0;
 tdble trackWidth = 0;
 
@@ -114,7 +119,6 @@ static void shutdown(int index) {
 		delete myrrt;
 	}
 }
-
 
 /* initialize track data, called for every selected driver */
 static void initTrack(int index, tTrack* track, void *carHandle, void **carParmHandle, tSituation * situation)
@@ -154,7 +158,6 @@ static void initTrack(int index, tTrack* track, void *carHandle, void **carParmH
 	srand(time(0));
 }
 
-
 /* initialize driver for the race, called for every selected driver */
 static void newRace(int index, tCarElt* car, tSituation *situation)
 {
@@ -169,7 +172,6 @@ static void newRace(int index, tCarElt* car, tSituation *situation)
 
 	currenttime = situation->currentTime;
 }
-
 
 /* controls the car */
 static void drive(int index, tCarElt* car, tSituation *situation)
@@ -205,20 +207,34 @@ static void drive(int index, tCarElt* car, tSituation *situation)
 	searchrange = MAX((int) ceil(situation->deltaTime*myc->getSpeed()+1.0) * 2, 4);
 	currentsegid = mpf->getCurrentSegment(myc->getCarPtr(),searchrange);
 	strpos = myc->getCurrentPos(); i++;
-	string str = to_string(i) + "-"+"X:"+to_string(strpos->x) + " Y:" + to_string(strpos->y)+" Z:" + to_string(strpos->z) + "\n" + "-Seg:" + to_string(currentsegid);
+	string str = to_string(i) + "-"+
+	"X:"+to_string(strpos->x)+
+	" Y:" + to_string(strpos->y)+
+	" Z:" + to_string(strpos->z)+
+	"-Seg:" + to_string(currentsegid);
 	dwind->setInfoS(str);
 
-	//Random state each i iterations
-	if(i%50 == 0)
-	{	
-		//Generates a random valid position (inside track)
-		v3d vPos = genValidRandPos();
-		//If its valid, its added to the pool;
-		if(vPos.x != 0)
+	//G.init = Add the goal state. Its the car current location
+	if(i%100 == 0 && !treeInit)
+	{
+		v3d* currPos = myc->getCurrentPos();
+		State* initState = new State((*currPos));
+		myrrt->addToPool(*initState);
+		treeInit = true;
+	}
+
+	if(i%50 == 0 && treeInit)
+	{
+		for (int k = 0; k < 1; k++)
 		{
-			State* newState = new State(vPos);
-			myrrt->addToPool(*newState);
-			cout << "State added at:" << "X:"<< vPos.x <<" Y:"<< vPos.y <<" Z:"<< vPos.z << endl;
+			//qRand = RandConf()
+			v3d qRand = genRandPos();
+			State* randState = new State(qRand);
+			myrrt->addToPool(*randState);
+			//TEMP : connect to root -> connect all created states to root
+			myrrt->getRoot()->addChild(*randState);
+			
+			//qNear = NearestVertex()
 		}
 	}
 
@@ -500,7 +516,9 @@ static int pitcmd(int index, tCarElt* car, tSituation *s)
 	return ROB_PIT_IM; /* return immediately */
 }
 
-/* Support function - generates random valid v3d */
+/*************************************** Support functions ***************************************/
+
+// Generates random valid v3d */
 v3d genValidRandPos()
 {
 	double randx = fRand(myTrack->min.x, myTrack->max.x);
@@ -522,4 +540,24 @@ v3d genValidRandPos()
 		return v3d(0,0,0);
 	}
 }
+
+//Generates random state
+v3d genRandPos()
+{
+	double randx = fRand(myTrack->min.x, myTrack->max.x);
+	double randy = fRand(myTrack->min.y, myTrack->max.y);
+	double maxz = myTrack->max.z;
+	v3d randpos = v3d(randx,randy,maxz);
+	return randpos;
+}
+
+//Euclidean distance between 2 points
+inline double euclDist(v3d a, v3d b)
+{
+	return sqrt(a.x - b.x) + (a.y - b.y);
+}
+
+//Finds the closest point to a point
+
+//I think ill need an interpolation (in order to create qNew -> qNear + U movement)
 

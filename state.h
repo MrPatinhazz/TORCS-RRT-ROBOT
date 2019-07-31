@@ -43,7 +43,6 @@ class State
         void setParent(State pState){
             parent = &pState;
             setGraphIndex(parent->getGraphIndex()+1);
-            cout<<"Parent set"<<endl;
         };
 
         void toString();

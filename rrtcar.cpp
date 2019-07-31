@@ -31,11 +31,14 @@ static void newRace(int index, tCarElt *car, tSituation *situation);
 static int InitFuncPt(int index, void *pt);
 static int pitcmd(int index, tCarElt *car, tSituation *s);
 static void shutdown(int index);
+/***********************/
 
-//Support function prototypes
+////////// Support function prototypes //////////
 v3d genValidRandPos();
 v3d genRandPos();
-double euclDist(v3d a, v3d b);
+inline double euclDist(v3d a, v3d b);
+void getNearest();
+////////////////////////////////////////////////
 
 static const char *botname[BOTS] = {
 	"rrtcar 1", "rrtcar 2", "rrtcar 3", "rrtcar 4", "rrtcar 5",
@@ -76,19 +79,19 @@ static int InitFuncPt(int index, void *pt)
 }
 
 //RRT class - holds the state pool and functions
-RRT *myrrt = nullptr;
+static RRT *myrrt = nullptr;
 //Debug window class and functions
 DWindow *dwind = nullptr;
 //Information string written on debug window
 v3d *strpos = {};
 //Track holder
 tTrack *myTrack = nullptr;
-//Last state created holder. TEMP
-State *prevState = nullptr;
 //Does debug window exist? // Has the tree started?
 bool windowCreated, treeInit = false;
 //Frame, close range, current track segment.
 int i, searchrange, currentsegid = 0;
+//Distance tracker of all segments
+double segDist, minSegDist = 99999;
 //Current track width
 tdble trackWidth = 0;
 
@@ -229,7 +232,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 				 "-Seg:" + to_string(currentsegid);
 	dwind->setInfoS(str);
 
-	//G.init = Add the goal state. Its the car current location
+	//G.init = Add the goal state. Its the car current location. also adds another node
 	if (i % 100 == 0 && !treeInit)
 	{
 		v3d *currPos = myc->getCurrentPos();
@@ -238,32 +241,16 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		treeInit = true;
 	}
 
+	// Creates a random configuration and adds it to the nearest already connected node
 	if (i % 50 == 0 && treeInit)
 	{
-		//qRand = RandConf()
-		v3d qRand = genRandPos();
-		State *randState = new State(qRand);
+		v3d randPos = genRandPos();
+		State *randState = new State(randPos);
 		myrrt->addToPool(*randState);
-		vector<State*> pool = myrrt->getStatePool();
-		
-		pool.at(pool.size()-2)->addChild(*randState);
-		randState->setParent(*pool.at(pool.size()-2));
-		cout << "Index: " << pool.at(pool.size()-2)->getGraphIndex() << endl;
-		cout << "Children:" << pool.at(pool.size()-2)->getChildren().size() << endl;
 
-		//qNear = NearestVertex()
-	}
-
-	if(i % 500 == 0 && treeInit)
-	{
-		int count = 0;
-		State* currState = myrrt->getRoot();
-		while(!currState->getChildren().empty())
-		{
-			currState = currState->getChildren().back();
-			count ++;
-		}
-		cout <<"Elements:"<<count << endl;
+		myrrt->getPool().at(myrrt->getPool().size() - 2)->addChild(*randState);
+		randState->setParent(*myrrt->getPool().at(myrrt->getPool().size() - 2));
+		getNearest();
 
 	}
 
@@ -650,12 +637,31 @@ v3d genRandPos()
 	return randpos;
 }
 
-//Euclidean distance between 2 points
-inline double euclDist(v3d a, v3d b)
+void getNearest()
 {
-	return sqrt(a.x - b.x) + (a.y - b.y);
+	if (treeInit)
+	{
+		State *currState = myrrt->getRoot();
+		while (!currState->getChildren().empty())
+		{
+			currState = currState->getChildren().back();
+			v3d currStatePos = currState->getPos();
+			v3d rootPos = myrrt->getRoot()->getPos();
+
+			segDist = euclDist(currStatePos, rootPos);
+			if (segDist < minSegDist)
+			{
+				minSegDist = segDist;
+				cout << "The closest node is the " << currState->getGraphIndex() << " at:" << minSegDist << " units" << endl;
+				cout << &currState << endl;
+			}
+		}
+	}
 }
 
-//Finds the closest point to a point
-
+inline double euclDist(v3d a, v3d b)
+{
+	double distance = sqrt((a.x - b.x) + (a.y - b.y));
+	return distance;
+}
 //I think ill need an interpolation (in order to create qNew -> qNear + U movement)

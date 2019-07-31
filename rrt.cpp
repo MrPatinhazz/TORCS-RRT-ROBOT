@@ -2,22 +2,21 @@
 
 RRT::RRT()
 {
-    statePool = {};
+  statePool = {};
 }
 
 RRT::~RRT()
 {
-  for(vector <State*>::iterator it = statePool.begin(); it != statePool.end(); it++)
+  for (vector<State *>::iterator it = statePool.begin(); it != statePool.end(); it++)
   {
-      (*it)->~State();
+    (*it)->~State();
   }
   statePool.clear();
 }
 
-
 void RRT::printPool()
 {
-  for(vector <State*>::iterator it = statePool.begin(); it != statePool.end(); it++)
+  for (vector<State *>::iterator it = statePool.begin(); it != statePool.end(); it++)
   {
     (*it)->toString();
   }

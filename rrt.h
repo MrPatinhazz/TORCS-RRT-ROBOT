@@ -14,7 +14,7 @@ class RRT
         RRT(){}
         ~RRT(){}
 
-        vector <State*> getStatePool(){return statePool;};
+        vector <State*> getPool(){return statePool;};
         void addToPool(State &newState){statePool.push_back(&newState);};
         State* getRoot(){return statePool.front();};
 

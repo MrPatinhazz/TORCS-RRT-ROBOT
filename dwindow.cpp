@@ -119,7 +119,7 @@ void drawWindowPath()
 	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos,2);
 
 	//Draws states position and connections
-	vector <State*> dwPool = dwRRT->getStatePool();
+	vector <State*> dwPool = dwRRT->getPool();
 	if(!dwPool.empty())
 	{
 		//Draw start (tree init)

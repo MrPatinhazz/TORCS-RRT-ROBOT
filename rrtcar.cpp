@@ -250,8 +250,9 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 		if (myrrt->getPool().size() < 3)
 		{
-			myrrt->getRoot()->addChild(*randState);
-			(*randState).setParent((*myrrt->getRoot()));
+			myrrt->getRoot()->addChild(*randState);	
+			//randState->setParent(*myrrt->getRoot());
+			(*randState).setParent(*myrrt->getRoot());
 		}
 		else
 		{

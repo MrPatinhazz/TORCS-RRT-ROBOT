@@ -37,7 +37,8 @@ public:
     State getParent() { return *parent; };
     void setParent(const State &pState)
     {
-        *parent = pState;
+        cout << "Setting..." << endl;
+        *this->parent = pState;
         //setGraphIndex(parent->getGraphIndex() + 1);
     };
 

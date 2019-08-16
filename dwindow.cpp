@@ -3,7 +3,7 @@
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 1
-#define SCALE 1
+#define SCALE 0.8
 
 string infoString;
 

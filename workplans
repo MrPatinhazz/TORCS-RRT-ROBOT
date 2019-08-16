@@ -1,5 +1,6 @@
-Os nodos agora são criados obrigatoriamente dentro da pista. 
-Proximo passo será limitar a criaçao de modos a uma área (um quadrado) de forma a criar uma possível linha mais fiável.
+De momento nao consigo devolver o endereco do nodo q esta mais proximo na arvore
+fica sempre a nullptr apesar de devolver a medida
+tenho q arranjar forma de passar os enderecos para as funcoes correctamentes
 
 The algorithm that constructs an RRT is shown in Figure 5.
 A simple iteration is performed in which each step attempts

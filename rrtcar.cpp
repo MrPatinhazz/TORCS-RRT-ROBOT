@@ -90,8 +90,8 @@ tTrack *myTrack = nullptr;
 bool windowCreated, treeInit = false;
 //Frame, close range, current track segment.
 int i, searchrange, currentsegid = 0;
-//Distance tracker of all segments
-double segDist, minSegDist = 99999;
+//Distance tracker of all states
+double stDist, minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
 
@@ -242,17 +242,36 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	// Creates a random configuration and adds it to the nearest already connected node
-	if (i % 50 == 0 && treeInit)
+	if (i % 100 == 0 && treeInit)
 	{
 		v3d randPos = genRandPos();
 		State *randState = new State(randPos);
 		myrrt->addToPool(*randState);
 
-		myrrt->getPool().at(myrrt->getPool().size() - 2)->addChild(*randState);
-		randState->setParent(*myrrt->getPool().at(myrrt->getPool().size() - 2));
-		getNearest();
-
+		if (myrrt->getPool().size() < 3)
+		{
+			myrrt->getRoot()->addChild(*randState);
+			(*randState).setParent((*myrrt->getRoot()));
+		}
+		else
+		{
+			cout << "in else" << endl;
+			/*
+			if (!myrrt->getPool().empty())
+			{
+				for (vector<State *>::iterator itp = myrrt->getPool().begin(); itp != myrrt->getPool().end(); itp++)
+				{
+					cout << (*itp)->getGraphIndex() << endl;
+				}
+			}
+			else
+			{
+				cout << "empty" << endl;
+			}
+			*/
+		}
 	}
+	//minStDist = 9999;
 
 	//Updates display window
 	dwind->Redisplay();
@@ -635,28 +654,6 @@ v3d genRandPos()
 	double maxz = myTrack->max.z;
 	v3d randpos = v3d(randx, randy, maxz);
 	return randpos;
-}
-
-void getNearest()
-{
-	if (treeInit)
-	{
-		State *currState = myrrt->getRoot();
-		while (!currState->getChildren().empty())
-		{
-			currState = currState->getChildren().back();
-			v3d currStatePos = currState->getPos();
-			v3d rootPos = myrrt->getRoot()->getPos();
-
-			segDist = euclDist(currStatePos, rootPos);
-			if (segDist < minSegDist)
-			{
-				minSegDist = segDist;
-				cout << "The closest node is the " << currState->getGraphIndex() << " at:" << minSegDist << " units" << endl;
-				cout << &currState << endl;
-			}
-		}
-	}
 }
 
 inline double euclDist(v3d a, v3d b)

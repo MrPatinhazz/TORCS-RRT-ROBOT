@@ -89,11 +89,13 @@ tTrack *myTrack = nullptr;
 //Does debug window exist? // Has the tree started?
 bool windowCreated, treeInit = false;
 //Frame, close range, current track segment.
-int i, searchrange, currentsegid = 0;
+int frame, searchrange, currentsegid = 0;
 //Distance tracker of all states
 double stDist, minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
+//Temp - Last state added
+State* lastState = nullptr;
 
 static MyCar *mycar[BOTS] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static OtherCar *ocar = NULL;
@@ -122,7 +124,10 @@ static void shutdown(int index)
 	}
 	if (dwind != NULL)
 	{
+		dwind->setInfoS(to_string(0));
 		delete dwind;
+		frame = 0;
+		currentsegid = 0;
 		windowCreated = false;
 	}
 	if (myrrt != NULL)
@@ -224,8 +229,8 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	searchrange = MAX((int)ceil(situation->deltaTime * myc->getSpeed() + 1.0) * 2, 4);
 	currentsegid = mpf->getCurrentSegment(myc->getCarPtr(), searchrange);
 	strpos = myc->getCurrentPos();
-	i++;
-	string str = to_string(i) + "-" +
+	frame++;
+	string str = to_string(frame) + "-" +
 				 "X:" + to_string(strpos->x) +
 				 " Y:" + to_string(strpos->y) +
 				 " Z:" + to_string(strpos->z) +
@@ -233,46 +238,36 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	dwind->setInfoS(str);
 
 	//G.init = Add the goal state. Its the car current location. also adds another node
-	if (i % 100 == 0 && !treeInit)
+	if (frame % 100 == 0 && !treeInit)
 	{
-		v3d *currPos = myc->getCurrentPos();
-		State *initState = new State((*currPos));
+		State *initState = new State(*myc->getCurrentPos());
 		myrrt->addToPool(*initState);
+		myrrt->getRoot()->setGraphIndex(0);
 		treeInit = true;
+		lastState = initState;
 	}
 
-	// Creates a random configuration and adds it to the nearest already connected node
-	if (i % 100 == 0 && treeInit)
+	if (treeInit && frame % 100 == 0)
 	{
-		v3d randPos = genRandPos();
-		State *randState = new State(randPos);
+		State *randState = new State(genRandPos());
 		myrrt->addToPool(*randState);
+		//lastState->addChild(*randState);
 
-		if (myrrt->getPool().size() < 3)
+		for (vector<State *>::iterator it = myrrt->getPool().begin(); it != myrrt->getPool().end(); it++)
 		{
-			myrrt->getRoot()->addChild(*randState);	
-			//randState->setParent(*myrrt->getRoot());
-			(*randState).setParent(*myrrt->getRoot());
-		}
-		else
-		{
-			cout << "in else" << endl;
-			/*
-			if (!myrrt->getPool().empty())
+			double dist = euclDist(randState->getPos(), (*it)->getPos());
+
+			if (dist < minStDist && dist != 0)
 			{
-				for (vector<State *>::iterator itp = myrrt->getPool().begin(); itp != myrrt->getPool().end(); itp++)
-				{
-					cout << (*itp)->getGraphIndex() << endl;
-				}
+				minStDist = dist;
+				cout << "min dist: " << minStDist << " At: " << &(*it) << endl;
 			}
-			else
-			{
-				cout << "empty" << endl;
-			}
-			*/
+			(lastState) = (*it);
 		}
+		cout << lastState << endl;
+		cout << "--------------" << endl;
 	}
-	//minStDist = 9999;
+	minStDist = 9999;
 
 	//Updates display window
 	dwind->Redisplay();
@@ -659,7 +654,6 @@ v3d genRandPos()
 
 inline double euclDist(v3d a, v3d b)
 {
-	double distance = sqrt((a.x - b.x) + (a.y - b.y));
-	return distance;
+	return sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2));
 }
 //I think ill need an interpolation (in order to create qNew -> qNear + U movement)

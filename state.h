@@ -31,23 +31,19 @@ public:
     void addChild(State &childState)
     {
         children.emplace_back(&childState);
+        childState.parent = &(*this);
+        childState.graphIndex = childState.parent->graphIndex + 1;
     };
+
+    State *getParent() { return parent; };
+
     void printChildren();
-
-    State getParent() { return *parent; };
-    void setParent(const State &pState)
-    {
-        cout << "Setting..." << endl;
-        *this->parent = pState;
-        //setGraphIndex(parent->getGraphIndex() + 1);
-    };
-
     void toString();
     float distFromStart = 0;
 
 private:
     v3d pos;
     int graphIndex;
-    State* parent;
+    State *parent;
     vector<State *> children;
 };

@@ -745,7 +745,7 @@ void Pathfinder::plan(int trackSegId, tCarElt* car, tSituation *situation, MyCar
 		/* are we on the trajectory or do i need a correction */
 		if ((myc->derror > myc->PATHERR*myc->PATHERRFACTOR ||
 		(myc->getDeltaPitch() > myc->MAXALLOWEDPITCH && myc->getSpeed() > myc->FLYSPEED))) {
-			std::cout<<"Need to change my path"<<std::endl;
+			//std::cout<<"Need to change my path"<<std::endl;
 			changed += correctPath(trackSegId, car, myc);
 		}
 		/* overtaking */

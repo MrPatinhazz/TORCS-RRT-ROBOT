@@ -247,11 +247,11 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		lastState = initState;
 	}
 
-	if (treeInit && frame % 100 == 0)
+	if (treeInit && frame % 10 == 0)
 	{
 		State *randState = new State(genRandPos());
 		myrrt->addToPool(*randState);
-		//lastState->addChild(*randState);
+		int minIndex = 0;
 
 		for (vector<State *>::iterator it = myrrt->getPool().begin(); it != myrrt->getPool().end(); it++)
 		{
@@ -260,11 +260,11 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 			if (dist < minStDist && dist != 0)
 			{
 				minStDist = dist;
-				cout << "min dist: " << minStDist << " At: " << &(*it) << endl;
+				minIndex = it - myrrt->getPool().begin();
 			}
-			(lastState) = (*it);
 		}
-		cout << lastState << endl;
+		cout << "min dist: " << minStDist << " At: " << minIndex << endl;
+		myrrt->getPool().at(minIndex)->addChild(*randState);
 		cout << "--------------" << endl;
 	}
 	minStDist = 9999;

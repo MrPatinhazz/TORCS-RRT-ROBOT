@@ -2,18 +2,18 @@
 
 State::State()
 {
-    pos = v3d(0,0,0);
-    graphIndex = 0;
-    parent = nullptr;
-    children = {};
+  pos = v3d(0, 0, 0);
+  graphIndex = 0;
+  parent = nullptr;
+  children = {};
 }
 
 State::State(v3d npos)
 {
-    pos = npos;
-    graphIndex = 0;
-    parent = nullptr;
-    children = {};
+  pos = npos;
+  graphIndex = 0;
+  parent = nullptr;
+  children = {};
 }
 
 State::~State()
@@ -22,16 +22,16 @@ State::~State()
 
 void State::toString()
 {
-    cout<< "Current Pos :" << endl;
-    cout << "X:"  << pos.x;
-    cout << " Y:" << pos.y;
-    cout << " Z:" << pos.z << endl;
+  cout << "Current Pos :" << endl;
+  cout << "X:" << pos.x;
+  cout << " Y:" << pos.y;
+  cout << " Z:" << pos.z << endl;
 }
 
 void State::printChildren()
 {
-  for(vector <State*>::iterator it = children.begin(); it != children.end(); it++)
+  for (size_t k = 0; k < children.size(); k++)
   {
-    (*it)->toString();
+    children.at(0)->toString();
   }
 }

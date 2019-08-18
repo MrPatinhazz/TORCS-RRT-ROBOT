@@ -7,17 +7,17 @@ RRT::RRT()
 
 RRT::~RRT()
 {
-  for (vector<State *>::iterator it = statePool.begin(); it != statePool.end(); it++)
+  for (size_t k = 0; k < statePool.size(); k++)
   {
-    (*it)->~State();
+    statePool.at(k)->~State();
   }
   statePool.clear();
 }
 
 void RRT::printPool()
 {
-  for (vector<State *>::iterator it = statePool.begin(); it != statePool.end(); it++)
+  for (size_t k = 0; k < statePool.size(); k++)
   {
-    (*it)->toString();
+    statePool.at(k)->toString();
   }
 }

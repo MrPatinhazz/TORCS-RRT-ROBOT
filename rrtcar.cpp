@@ -37,7 +37,6 @@ static void shutdown(int index);
 v3d genValidRandPos();
 v3d genRandPos();
 inline double euclDist(v3d a, v3d b);
-void getNearest();
 ////////////////////////////////////////////////
 
 static const char *botname[BOTS] = {
@@ -88,14 +87,12 @@ v3d *strpos = {};
 tTrack *myTrack = nullptr;
 //Does debug window exist? // Has the tree started?
 bool windowCreated, treeInit = false;
-//Frame, close range, current track segment.
+//Frame, seg search range, current track segment.
 int frame, searchrange, currentsegid = 0;
 //Distance tracker of all states
-double stDist, minStDist = 99999;
+double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
-//Temp - Last state added
-State* lastState = nullptr;
 
 static MyCar *mycar[BOTS] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static OtherCar *ocar = NULL;
@@ -244,30 +241,28 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		myrrt->addToPool(*initState);
 		myrrt->getRoot()->setGraphIndex(0);
 		treeInit = true;
-		lastState = initState;
 	}
 
-	if (treeInit && frame % 10 == 0)
+	//Nearest - finds the closest, already connected state and adds the last random state to it
+	if (treeInit && frame % 5 == 0)
 	{
-		State *randState = new State(genRandPos());
+		State *randState = new State(genValidRandPos());
 		myrrt->addToPool(*randState);
-		int minIndex = 0;
+		int minIndex = -1;
+		minStDist = 9999;
 
-		for (vector<State *>::iterator it = myrrt->getPool().begin(); it != myrrt->getPool().end(); it++)
+		for (size_t k = 0; k < myrrt->getPool().size()-1; k++)
 		{
-			double dist = euclDist(randState->getPos(), (*it)->getPos());
+			double dist = euclDist(randState->getPos(), myrrt->getPool().at(k)->getPos());
 
-			if (dist < minStDist && dist != 0)
+			if (dist < minStDist)
 			{
 				minStDist = dist;
-				minIndex = it - myrrt->getPool().begin();
+				minIndex = k;
 			}
-		}
-		cout << "min dist: " << minStDist << " At: " << minIndex << endl;
+		};
 		myrrt->getPool().at(minIndex)->addChild(*randState);
-		cout << "--------------" << endl;
 	}
-	minStDist = 9999;
 
 	//Updates display window
 	dwind->Redisplay();

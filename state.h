@@ -34,7 +34,6 @@ public:
         childState.parent = &(*this);
         childState.graphIndex = childState.parent->graphIndex + 1;
     };
-
     State *getParent() { return parent; };
 
     void printChildren();

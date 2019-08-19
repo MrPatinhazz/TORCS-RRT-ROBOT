@@ -26,7 +26,6 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
-#include <memory>
 
 #include <tgf.h>
 #include <track.h>
@@ -44,6 +43,7 @@
 #include "dwindow.h"
 #include "state.h"
 #include "rrt.h"
+#include "heuristics.h"
 
 #define TRACKFILENAME		"/home/berni/track.dat"
 #define TRACKDESCFILENAME   "/home/berni/track.txt"

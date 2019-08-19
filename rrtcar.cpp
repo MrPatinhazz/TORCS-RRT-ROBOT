@@ -33,10 +33,10 @@ static int pitcmd(int index, tCarElt *car, tSituation *s);
 static void shutdown(int index);
 /***********************/
 
-////////// Support function prototypes //////////
-v3d genValidRandPos();
-v3d genRandPos();
-inline double euclDist(v3d a, v3d b);
+/* Support function prototypes */
+
+/* Updates the text debug window */
+void updateTextWindow(tSituation* situation, MyCar* myCar, Pathfinder* mpf);
 ////////////////////////////////////////////////
 
 static const char *botname[BOTS] = {
@@ -207,7 +207,9 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	MyCar *myc = mycar[index - 1];
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
-	//Creates the Stats and path window
+	/** 
+	 * *Creates the Stats and path window* */
+	
 	if (!windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
@@ -223,16 +225,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	myc->update(myTrackDesc, car, situation);
 
 	//Updates debug window string information
-	searchrange = MAX((int)ceil(situation->deltaTime * myc->getSpeed() + 1.0) * 2, 4);
-	currentsegid = mpf->getCurrentSegment(myc->getCarPtr(), searchrange);
-	strpos = myc->getCurrentPos();
-	frame++;
-	string str = to_string(frame) + "-" +
-				 "X:" + to_string(strpos->x) +
-				 " Y:" + to_string(strpos->y) +
-				 " Z:" + to_string(strpos->z) +
-				 "-Seg:" + to_string(currentsegid);
-	dwind->setInfoS(str);
+	updateTextWindow(situation, myc, mpf);
 
 	//G.init = Add the goal state. Its the car current location. also adds another node
 	if (frame % 100 == 0 && !treeInit)
@@ -244,23 +237,26 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//Nearest - finds the closest, already connected state and adds the last random state to it
+	//TODO: Connect the closest already connected state to a new state u units
+
 	if (treeInit && frame % 5 == 0)
 	{
-		State *randState = new State(genValidRandPos());
+		State *randState = new State(RandomGen::CTAPos(myTrack,myTrackDesc));
 		myrrt->addToPool(*randState);
 		int minIndex = -1;
 		minStDist = 9999;
 
-		for (size_t k = 0; k < myrrt->getPool().size()-1; k++)
+		for (size_t k = 0; k < myrrt->getPool().size() - 1; k++)
 		{
-			double dist = euclDist(randState->getPos(), myrrt->getPool().at(k)->getPos());
+			double dist = Dist::eucl(randState->getPos(), myrrt->getPool().at(k)->getPos());
 
 			if (dist < minStDist)
 			{
-				minStDist = dist;
-				minIndex = k;
+				minStDist = dist; minIndex = k;
 			}
 		};
+
+		//TODO: Instead of connecting the closest directly to the random, interpolate u unit and connect that new state
 		myrrt->getPool().at(minIndex)->addChild(*randState);
 	}
 
@@ -612,43 +608,17 @@ static int pitcmd(int index, tCarElt *car, tSituation *s)
 	return ROB_PIT_IM; /* return immediately */
 }
 
-/*************************************** Support functions ***************************************/
-
-// Generates random valid v3d */
-v3d genValidRandPos()
+/* Updates the text debug window */
+void updateTextWindow(tSituation* situation, MyCar* myc, Pathfinder* mpf)
 {
-	double randx = fRand(myTrack->min.x, myTrack->max.x);
-	double randy = fRand(myTrack->min.y, myTrack->max.y);
-	double maxz = myTrack->max.z;
-	v3d randpos = v3d(randx, randy, maxz);
-
-	int closestid = myTrackDesc->getNearestId(&randpos);
-	double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(randpos.x, randpos.y);
-	double distToBorder = distToPos - myTrack->width;
-	cout << "To border: " << distToBorder << endl;
-	//< 0 - 2 to account for track margin
-	if (distToBorder < -2)
-	{
-		return randpos;
-	}
-	else
-	{
-		return v3d(0, 0, 0);
-	}
+	searchrange = MAX((int)ceil(situation->deltaTime * myc->getSpeed() + 1.0) * 2, 4);
+	currentsegid = mpf->getCurrentSegment(myc->getCarPtr(), searchrange);
+	strpos = myc->getCurrentPos();
+	frame++;
+	string str = to_string(frame) + "-" +
+				 "X:" + to_string(strpos->x) +
+				 " Y:" + to_string(strpos->y) +
+				 " Z:" + to_string(strpos->z) +
+				 "-Seg:" + to_string(currentsegid);
+	dwind->setInfoS(str);
 }
-
-//Generates random state
-v3d genRandPos()
-{
-	double randx = fRand(myTrack->min.x, myTrack->max.x);
-	double randy = fRand(myTrack->min.y, myTrack->max.y);
-	double maxz = myTrack->max.z;
-	v3d randpos = v3d(randx, randy, maxz);
-	return randpos;
-}
-
-inline double euclDist(v3d a, v3d b)
-{
-	return sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2));
-}
-//I think ill need an interpolation (in order to create qNew -> qNear + U movement)

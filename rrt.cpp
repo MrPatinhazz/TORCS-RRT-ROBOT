@@ -1,5 +1,7 @@
 #include "rrt.h"
 
+double _angle = 0;
+
 RRT::RRT()
 {
   statePool = {};
@@ -20,4 +22,14 @@ void RRT::printPool()
   {
     statePool.at(k)->toString();
   }
+}
+
+void RRT::addNewStep(State* minDistState, v3d &randPos)
+{
+    cout << "test" << endl;
+  	double angle = Trig::angleBetween(minDistState->getPos(), &randPos);
+		v3d newStep = Util::step(minDistState->getPos(),angle);
+		State *newState = new State(newStep);
+		(*newState);
+		minDistState->addChild(*newState);
 }

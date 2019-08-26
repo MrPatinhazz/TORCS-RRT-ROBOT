@@ -38,12 +38,12 @@
 #include "trackdesc.h"
 #include "mycar.h"
 #include "pathfinder.h"
+#include "heuristics.h"
 
 //Added
 #include "dwindow.h"
 #include "state.h"
 #include "rrt.h"
-#include "heuristics.h"
 
 #define TRACKFILENAME		"/home/berni/track.dat"
 #define TRACKDESCFILENAME   "/home/berni/track.txt"

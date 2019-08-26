@@ -22,7 +22,6 @@ State::~State()
 
 void State::toString()
 {
-  cout << "Current Pos :" << endl;
   cout << "X:" << pos.x;
   cout << " Y:" << pos.y;
   cout << " Z:" << pos.z << endl;

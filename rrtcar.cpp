@@ -83,13 +83,15 @@ static RRT *myrrt = nullptr;
 DWindow *dwind = nullptr;
 //Information string written on debug window
 v3d *strpos = {};
+//Rand position
+v3d randpos = {};
 //Track holder
 tTrack *myTrack = nullptr;
 //Does debug window exist? // Has the tree started?
 bool windowCreated, treeInit = false;
 //Frame, seg search range, current track segment.
 int frame, searchrange, currentsegid = 0;
-//Distance tracker of all states
+//Distance tracker of all states, Angle between rand and near states
 double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
@@ -237,27 +239,23 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//Nearest - finds the closest, already connected state and adds the last random state to it
-	//TODO: Connect the closest already connected state to a new state u units
-
-	if (treeInit && frame % 5 == 0)
+	if (treeInit && frame % 2 == 0)
 	{
-		State *randState = new State(RandomGen::CTAPos(myTrack,myTrackDesc));
-		myrrt->addToPool(*randState);
+		randpos = RandomGen::CTAPos(myTrack,myTrackDesc);
 		int minIndex = -1;
 		minStDist = 9999;
 
-		for (size_t k = 0; k < myrrt->getPool().size() - 1; k++)
+		for (size_t k = 0; k < myrrt->getPool().size(); k++)
 		{
-			double dist = Dist::eucl(randState->getPos(), myrrt->getPool().at(k)->getPos());
+			double dist = Dist::eucl(randpos, *myrrt->getPool().at(k)->getPos());
 
-			if (dist < minStDist)
+			if (0 < dist && dist < minStDist)
 			{
 				minStDist = dist; minIndex = k;
 			}
 		};
 
-		//TODO: Instead of connecting the closest directly to the random, interpolate u unit and connect that new state
-		myrrt->getPool().at(minIndex)->addChild(*randState);
+		myrrt->addNewStep(myrrt->getPool().at(minIndex),randpos);
 	}
 
 	//Updates display window

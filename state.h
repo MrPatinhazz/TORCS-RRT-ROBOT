@@ -22,7 +22,7 @@ public:
     State(v3d npos);
     ~State();
 
-    v3d getPos() { return pos; };
+    v3d* getPos() { return &pos; };
     void setPos(v3d pos);
 
     int getGraphIndex() { return graphIndex; };

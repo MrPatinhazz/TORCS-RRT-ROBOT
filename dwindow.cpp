@@ -12,6 +12,7 @@ RRT *dwRRT;
 TrackDesc *dwTrDesc;
 Pathfinder *dwPf;
 int nTSeg = 0;
+const GLfloat twicePi = PI*2.0f; 
 
 DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfinder *mpf)
 {
@@ -169,7 +170,6 @@ void drawCircle(tPosd point, GLfloat radius)
 
 	int i;
 	int triangleAmount = 30;
-	GLfloat twicePi = 2.0f * PI;
 
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(CIRCLEWIDTH);
@@ -192,7 +192,6 @@ void drawCircleP(v3d pos, GLfloat radius)
 
 	int i;
 	int triangleAmount = 30;
-	GLfloat twicePi = 2.0f * PI;
 
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(CIRCLEWIDTH);
@@ -215,7 +214,6 @@ void drawCircleP(v3d *pos, GLfloat radius)
 
 	int i;
 	int triangleAmount = 30;
-	GLfloat twicePi = 2.0f * PI;
 
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(CIRCLEWIDTH);
@@ -243,10 +241,10 @@ void drawLine(double initialPointX, double initialPointY, double finalPointX, do
 void drawLine(State *initialS, State *finalS)
 {
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
-	double initPointx = initialS->getPos().x;
-	double initPointy = initialS->getPos().y;
-	double finalPointx = finalS->getPos().x;
-	double finalPointy = finalS->getPos().y;
+	double initPointx = initialS->getPos()->x;
+	double initPointy = initialS->getPos()->y;
+	double finalPointx = finalS->getPos()->x;
+	double finalPointy = finalS->getPos()->y;
 
 	glLineWidth(LINEWIDTH);
 	glBegin(GL_LINES);
@@ -254,3 +252,5 @@ void drawLine(State *initialS, State *finalS)
 	glVertex2f(finalPointx, h - finalPointy);
 	glEnd();
 }
+
+//TODO: RENDER TO TEXTURE MAP SEGMENTSS

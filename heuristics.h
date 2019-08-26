@@ -6,6 +6,10 @@
 
 #include "berniw.h"
 
+using namespace std;
+
+const double _stepsize = 20;
+
 //Random number/state generators
 class RandomGen
 {
@@ -59,4 +63,24 @@ public:
 	{
 		return sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2));
 	}
+};
+
+class Trig
+{
+public:
+	static double angleBetween(v3d* a, v3d* b)
+	{
+		return atan2(b->x - a->x, b->y - a->y) * 180/PI;
+	};
+};
+
+class Util
+{
+public:
+	static v3d step(v3d* a, double angle)
+	{
+		double nx = a->x + (_stepsize * sin(DEG2RAD(angle)));
+		double ny = a->y + (_stepsize * cos(DEG2RAD(angle)));
+		return v3d(nx,ny,a->z);
+	};
 };

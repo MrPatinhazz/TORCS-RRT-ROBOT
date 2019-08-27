@@ -7,6 +7,9 @@
 #pragma once
 
 #include "state.h"
+#include "heuristics.h"
+
+using namespace std;
 
 class RRT
 {
@@ -16,7 +19,7 @@ class RRT
 
         vector <State*> getPool(){return statePool;};
         void addToPool(State &newState){statePool.emplace_back(&newState);};
-        void addNewStep();
+        void addNewStep(State *nearState, v3d *randPos);
 
         State* getRoot(){return statePool.front();};
 

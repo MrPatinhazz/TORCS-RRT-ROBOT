@@ -34,15 +34,16 @@
 #include <robot.h>
 #include <robottools.h>
 #include <math.h>
+#include "linalg.h"
 #include "spline.h"
 #include "trackdesc.h"
 #include "mycar.h"
 #include "pathfinder.h"
 
 //Added
-#include "dwindow.h"
-#include "state.h"
 #include "rrt.h"
+#include "state.h"
+#include "dwindow.h"
 #include "heuristics.h"
 
 #define TRACKFILENAME		"/home/berni/track.dat"

@@ -253,12 +253,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 			}
 		};
 
-	  	double angle = Trig::angleBetween(myrrt->getPool().at(minIndex)->getPos(), &randpos);
-		v3d newStep = Util::step(myrrt->getPool().at(minIndex)->getPos(),angle);
-		State *newState = new State(newStep);
-		myrrt->addToPool(*newState);
-		myrrt->getPool().at(minIndex)->addChild(*newState);
-		myrrt->addNewStep();
+		myrrt->addNewStep(myrrt->getPool().at(minIndex),&randpos);
 	}
 
 	//Updates display window

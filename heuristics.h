@@ -15,7 +15,7 @@ class RandomGen
 {
 public:
 
-	//Random number withing fMin-fMax
+	//Random number within fMin-fMax
 	inline static double fRands(double fMin, double fMax)
 	{
     	double f = (double)rand() / RAND_MAX;

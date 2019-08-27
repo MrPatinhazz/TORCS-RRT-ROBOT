@@ -9,12 +9,11 @@
 #include <stdio.h>
 #include <cstring>
 #include "GL/freeglut.h"
-#include "mycar.h"
-#include "trackdesc.h"
-#include "rrt.h"
+#include "berniw.h"
 
 using namespace std;
 
+class RRT;
 class DWindow
 {
     public:

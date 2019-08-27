@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include "math.h"
 
 class v3d {
 	public:

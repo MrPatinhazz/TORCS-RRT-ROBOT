@@ -10,8 +10,8 @@
 #include <cstring>
 #include "GL/freeglut.h"
 #include "mycar.h"
-#include "rrt.h"
 #include "trackdesc.h"
+#include "rrt.h"
 
 using namespace std;
 

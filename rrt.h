@@ -7,13 +7,12 @@
 #pragma once
 
 #include "state.h"
-#include "heuristics.h"
 
 class RRT
 {
     public:
-        RRT(){}
-        ~RRT(){}
+        RRT();
+        ~RRT();
 
         vector <State*> getPool(){return statePool;};
         void addToPool(State &newState){statePool.emplace_back(&newState);};

@@ -89,8 +89,8 @@ v3d randpos = {};
 tTrack *myTrack = nullptr;
 //Does debug window exist? // Has the tree started?
 bool windowCreated, treeInit = false;
-//Frame, seg search range, current track segment.
-int frame, searchrange, currentsegid = 0;
+//Frame, seg search range, current track segment, closest state index
+int frame, searchrange, currentsegid = 0, minIndex;
 //Distance tracker of all states, Angle between rand and near states
 double minStDist = 99999;
 //Current track width
@@ -209,9 +209,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	MyCar *myc = mycar[index - 1];
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
-	/** 
-	 * *Creates the Stats and path window* */
-	
+	// Creates the Stats and path window
 	if (!windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
@@ -239,23 +237,28 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//Nearest - finds the closest, already connected state and adds the last random state to it
-	if (treeInit && frame % 2 == 0)
+	if (treeInit )
 	{
 		randpos = RandomGen::CTAPos(myTrack,myTrackDesc);
-		int minIndex = -1;
+		minIndex = -1;
 		minStDist = 9999;
 
 		for (size_t k = 0; k < myrrt->getPool().size(); k++)
 		{
 			double dist = Dist::eucl(randpos, *myrrt->getPool().at(k)->getPos());
 
-			if (0 < dist && dist < minStDist)
+			if (dist > 0 && dist < minStDist)
 			{
 				minStDist = dist; minIndex = k;
 			}
 		};
 
-		myrrt->addNewStep(myrrt->getPool().at(minIndex),randpos);
+	  	double angle = Trig::angleBetween(myrrt->getPool().at(minIndex)->getPos(), &randpos);
+		v3d newStep = Util::step(myrrt->getPool().at(minIndex)->getPos(),angle);
+		State *newState = new State(newStep);
+		myrrt->addToPool(*newState);
+		myrrt->getPool().at(minIndex)->addChild(*newState);
+		myrrt->addNewStep();
 	}
 
 	//Updates display window

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const double _stepsize = 20;
+const double _stepsize = 5;
 
 //Random number/state generators
 class RandomGen

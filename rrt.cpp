@@ -16,20 +16,16 @@ RRT::~RRT()
   statePool.clear();
 }
 
+void RRT::addNewStep()
+{
+    cout << "test" << endl;
+    return;
+}
+
 void RRT::printPool()
 {
   for (size_t k = 0; k < statePool.size(); k++)
   {
     statePool.at(k)->toString();
   }
-}
-
-void RRT::addNewStep(State* minDistState, v3d &randPos)
-{
-    cout << "test" << endl;
-  	double angle = Trig::angleBetween(minDistState->getPos(), &randPos);
-		v3d newStep = Util::step(minDistState->getPos(),angle);
-		State *newState = new State(newStep);
-		(*newState);
-		minDistState->addChild(*newState);
 }

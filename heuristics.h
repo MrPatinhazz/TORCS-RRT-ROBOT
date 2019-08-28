@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const double _stepsize = 5;
+const double _stepsize = 10;
 
 //Random number/state generators
 class RandomGen
@@ -33,7 +33,6 @@ public:
 		int closestid = myTrackDesc->getNearestId(&randpos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(randpos.x, randpos.y);
 		double distToBorder = distToPos - myTrack->width;
-		cout << "To border: " << distToBorder << endl;
 		//< 0 - 2 to account for track margin
 		if (distToBorder < -2)
 		{
@@ -77,10 +76,21 @@ public:
 class Util
 {
 public:
-	static v3d step(v3d* a, double angle)
+	static v3d step(v3d* nearState, v3d* randPos)
 	{
-		double nx = a->x + (_stepsize * sin(DEG2RAD(angle)));
-		double ny = a->y + (_stepsize * cos(DEG2RAD(angle)));
-		return v3d(nx,ny,a->z);
+		double angle = Trig::angleBetween(nearState, randPos);
+		double nx = nearState->x + (_stepsize * sin(DEG2RAD(angle)));
+		double ny = nearState->y + (_stepsize * cos(DEG2RAD(angle)));
+		return v3d(nx,ny,nearState->z);
+	};
+
+	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos)
+	{
+		int closestid = myTrackDesc->getNearestId(pos);
+		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+		double distToBorder = distToPos - myTrack->width;
+		//< 0 - 2 to account for track margin
+		cout << distToBorder << endl;
+		return distToBorder < -1;		
 	};
 };

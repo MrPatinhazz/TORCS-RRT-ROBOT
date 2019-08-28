@@ -95,6 +95,8 @@ int frame, searchrange, currentsegid = 0, minIndex;
 double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
+//States per frame
+const int _STF = 20;
 
 static MyCar *mycar[BOTS] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static OtherCar *ocar = NULL;
@@ -225,6 +227,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	myc->update(myTrackDesc, car, situation);
 
 	//Updates debug window string information
+	if(windowCreated)
 	updateTextWindow(situation, myc, mpf);
 
 	//G.init = Add the goal state. Its the car current location. also adds another node
@@ -237,26 +240,34 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//Nearest - finds the closest, already connected state and adds the last random state to it
-	if (treeInit )
+	if (treeInit)
 	{
-		randpos = RandomGen::CTAPos(myTrack,myTrackDesc);
-		minIndex = -1;
-		minStDist = 9999;
-
-		for (size_t k = 0; k < myrrt->getPool().size(); k++)
+		for(int j = 0; j < _STF; j++)
 		{
-			double dist = Dist::eucl(randpos, *myrrt->getPool().at(k)->getPos());
+			randpos = RandomGen::CTAPos(myTrack,myTrackDesc);
+			minIndex = -1;
+			minStDist = 9999;
 
-			if (dist > 0 && dist < minStDist)
+			for (size_t k = 0; k < myrrt->getPool().size(); k++)
 			{
-				minStDist = dist; minIndex = k;
-			}
-		};
+				double dist = Dist::eucl(randpos, *myrrt->getPool().at(k)->getPos());
 
-		myrrt->addNewStep(myrrt->getPool().at(minIndex),&randpos);
+				if (dist > 0 && dist < minStDist)
+				{
+					minStDist = dist; minIndex = k;
+				}
+			};
+
+			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(),&randpos);
+			if(Util::isPosValid(myTrack,myTrackDesc,&step))
+			{
+				myrrt->addState(myrrt->getAt(minIndex), &step);
+			}
+		}
 	}
 
 	//Updates display window
+	if(windowCreated)
 	dwind->Redisplay();
 
 	/* decide how we want to drive */

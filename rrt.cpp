@@ -16,13 +16,11 @@ RRT::~RRT()
   statePool.clear();
 }
 
-void RRT::addNewStep(State *nearState, v3d *randPos)
+void RRT::addState(State *nearState, v3d *pos)
 {
-    double angle = Trig::angleBetween(nearState->getPos(), randPos);
-		v3d newStep = Util::step(nearState->getPos(),angle);
-		State *newState = new State(newStep);
-		addToPool(*newState);
-		nearState->addChild(*newState);
+	State *newState = new State(*pos);
+	addToPool(*newState);
+	nearState->addChild(*newState);
 }
 
 void RRT::printPool()

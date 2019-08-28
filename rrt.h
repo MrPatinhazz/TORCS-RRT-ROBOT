@@ -19,7 +19,8 @@ class RRT
 
         vector <State*> getPool(){return statePool;};
         void addToPool(State &newState){statePool.emplace_back(&newState);};
-        void addNewStep(State *nearState, v3d *randPos);
+        void addState(State *nearState, v3d *pos);
+        State* getAt(int index){return statePool.at(index);};
 
         State* getRoot(){return statePool.front();};
 

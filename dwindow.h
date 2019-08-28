@@ -38,7 +38,6 @@ void printText(int x, int y, char *string);
 void drawWindowPath();
 void drawMapSegments();
 void drawCircle(tPosd point, GLfloat radius);
-void drawCircleP(v3d pos, GLfloat radius);
 void drawCircleP(v3d* pos, GLfloat radius);
 void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY);
 void drawLine(State* initialS, State* finalS);

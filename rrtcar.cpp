@@ -231,6 +231,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	updateTextWindow(situation, myc, mpf);
 
 	//G.init = Add the goal state. Its the car current location. also adds another node
+	//TODO: START WHEN OVERTAKING
 	if (frame % 100 == 0 && !treeInit)
 	{
 		State *initState = new State(*myc->getCurrentPos());
@@ -242,13 +243,13 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	//Nearest - finds the closest, already connected state and adds the last random state to it
 	if (treeInit)
 	{
-		for(int j = 0; j < _STF; j++)
+		for(int j = _STF; j--;)
 		{
 			randpos = RandomGen::CTAPos(myTrack,myTrackDesc);
 			minIndex = -1;
 			minStDist = 9999;
 
-			for (size_t k = 0; k < myrrt->getPool().size(); k++)
+			for (size_t k = myrrt->getPool().size(); k--;)
 			{
 				double dist = Dist::eucl(randpos, *myrrt->getPool().at(k)->getPos());
 

@@ -22,36 +22,13 @@ public:
     	return fMin + f * (fMax - fMin);
 	}
 
-	// Generates random state inside track
-	static v3d ITPos(tTrack *myTrack, TrackDesc *myTrackDesc)
-	{
-		double randx = fRands(myTrack->min.x, myTrack->max.x);
-		double randy = fRands(myTrack->min.y, myTrack->max.y);
-		double maxz = myTrack->max.z;
-		v3d randpos = v3d(randx, randy, maxz);
-
-		int closestid = myTrackDesc->getNearestId(&randpos);
-		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(randpos.x, randpos.y);
-		double distToBorder = distToPos - myTrack->width;
-		//< 0 - 2 to account for track margin
-		if (distToBorder < -2)
-		{
-			return randpos;
-		}
-		else
-		{
-			return v3d(0, 0, 0);
-		}
-	};
-
 	//Generates a random state using the complete track area
 	static v3d CTAPos(tTrack *myTrack, TrackDesc *myTrackDesc)
 	{
 		double randx = fRands(myTrack->min.x, myTrack->max.x);
 		double randy = fRands(myTrack->min.y, myTrack->max.y);
 		double maxz = myTrack->max.z;
-		v3d randpos = v3d(randx, randy, maxz);
-		return randpos;
+		return v3d(randx, randy, maxz);
 	}
 };
 
@@ -60,7 +37,7 @@ class Dist
 public:
 	static double inline eucl(v3d a, v3d b)
 	{
-		return sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2));
+		return sqrt(((a.x - b.x)*(a.x - b.x))+((a.y - b.y)*(a.y - b.y)));
 	}
 };
 
@@ -87,10 +64,9 @@ public:
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos)
 	{
 		int closestid = myTrackDesc->getNearestId(pos);
-		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x,pos->y);
 		double distToBorder = distToPos - myTrack->width;
 		//< 0 - 2 to account for track margin
-		cout << distToBorder << endl;
-		return distToBorder < -1;		
+		return (distToBorder < -7);		
 	};
 };

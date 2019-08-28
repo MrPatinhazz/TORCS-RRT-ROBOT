@@ -3,7 +3,7 @@
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 1
-#define SCALE 1
+#define SCALE 0.5
 
 string infoString;
 
@@ -121,22 +121,17 @@ void drawWindowPath()
 	vector<State *> dwPool = dwRRT->getPool();
 	if (!dwPool.empty())
 	{
-		//Draw start (tree init)
-		glColor3f(0, 0, 1);
-		drawCircleP(dwPool[0]->getPos(), 2);
-
-		//Draw the rest of the tree
-		for (vector<State *>::size_type j = 0; j < dwPool.size(); j++)
+		for (size_t j = dwPool.size(); j--;)
 		{
 			glColor3f(1, 1, 0);
-			drawCircleP(dwPool[j]->getPos(), 2);
+			drawCircleP(dwPool[j]->getPos(), 1);
 
 			//Draws trees connections (edges)
 			glColor3f(1, 0, 0);
 			vector<State *> sChildren = dwPool[j]->getChildren();
 			if (!sChildren.empty())
 			{
-				for (vector<State *>::size_type k = 0; k < sChildren.size(); k++)
+				for (size_t k = sChildren.size(); k--;)
 				{
 					drawLine(dwPool[j], sChildren[k]);
 				}
@@ -175,29 +170,7 @@ void drawCircle(tPosd point, GLfloat radius)
 	glLineWidth(CIRCLEWIDTH);
 
 	glBegin(GL_LINES);
-	for (i = 0; i <= triangleAmount; i++)
-	{
-		glVertex2f(x, y);
-		glVertex2f(x + (radius * cos(i * twicePi / triangleAmount)), y + (radius * sin(i * twicePi / triangleAmount)));
-	}
-	glEnd();
-}
-
-void drawCircleP(v3d pos, GLfloat radius)
-{
-	int h = glutGet(GLUT_WINDOW_HEIGHT);
-
-	int x = (pos.x * SCALE);
-	int y = h - (pos.y * SCALE);
-
-	int i;
-	int triangleAmount = 30;
-
-	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(CIRCLEWIDTH);
-
-	glBegin(GL_LINES);
-	for (i = 0; i <= triangleAmount; i++)
+	for (i = triangleAmount; i--;)
 	{
 		glVertex2f(x, y);
 		glVertex2f(x + (radius * cos(i * twicePi / triangleAmount)), y + (radius * sin(i * twicePi / triangleAmount)));
@@ -219,7 +192,7 @@ void drawCircleP(v3d *pos, GLfloat radius)
 	glLineWidth(CIRCLEWIDTH);
 
 	glBegin(GL_LINES);
-	for (i = 0; i <= triangleAmount; i++)
+	for (i = triangleAmount; i--;)
 	{
 		glVertex2f(x, y);
 		glVertex2f(x + (radius * cos(i * twicePi / triangleAmount)), y + (radius * sin(i * twicePi / triangleAmount)));
@@ -248,8 +221,8 @@ void drawLine(State *initialS, State *finalS)
 
 	glLineWidth(LINEWIDTH);
 	glBegin(GL_LINES);
-	glVertex2f(initPointx, h - initPointy);
-	glVertex2f(finalPointx, h - finalPointy);
+	glVertex2f(initPointx * SCALE, h - (initPointy * SCALE));
+	glVertex2f(finalPointx * SCALE, h - (finalPointy * SCALE));
 	glEnd();
 }
 

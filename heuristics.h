@@ -14,12 +14,11 @@ const double _stepsize = 10;
 class RandomGen
 {
 public:
-
 	//Random number within fMin-fMax
 	inline static double fRands(double fMin, double fMax)
 	{
-    	double f = (double)rand() / RAND_MAX;
-    	return fMin + f * (fMax - fMin);
+		double f = (double)rand() / RAND_MAX;
+		return fMin + f * (fMax - fMin);
 	}
 
 	//Generates a random state using the complete track area
@@ -37,36 +36,36 @@ class Dist
 public:
 	static double inline eucl(v3d a, v3d b)
 	{
-		return sqrt(((a.x - b.x)*(a.x - b.x))+((a.y - b.y)*(a.y - b.y)));
+		return sqrt(((a.x - b.x) * (a.x - b.x)) + ((a.y - b.y) * (a.y - b.y)));
 	}
 };
 
 class Trig
 {
 public:
-	static double angleBetween(v3d* a, v3d* b)
+	static double angleBetween(v3d *a, v3d *b)
 	{
-		return atan2(b->x - a->x, b->y - a->y) * 180/PI;
+		return atan2(b->x - a->x, b->y - a->y) * 180 / PI;
 	};
 };
 
 class Util
 {
 public:
-	static v3d step(v3d* nearState, v3d* randPos)
+	static v3d step(v3d *nearState, v3d *randPos)
 	{
 		double angle = Trig::angleBetween(nearState, randPos);
 		double nx = nearState->x + (_stepsize * sin(DEG2RAD(angle)));
 		double ny = nearState->y + (_stepsize * cos(DEG2RAD(angle)));
-		return v3d(nx,ny,nearState->z);
+		return v3d(nx, ny, nearState->z);
 	};
 
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos)
 	{
 		int closestid = myTrackDesc->getNearestId(pos);
-		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x,pos->y);
+		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 		double distToBorder = distToPos - myTrack->width;
 		//< 0 - 2 to account for track margin
-		return (distToBorder < -7);		
+		return (distToBorder < -7);
 	};
 };

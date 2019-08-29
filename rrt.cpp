@@ -18,9 +18,9 @@ RRT::~RRT()
 
 void RRT::addState(State *nearState, v3d *pos)
 {
-	State *newState = new State(*pos);
-	addToPool(*newState);
-	nearState->addChild(*newState);
+  State *newState = new State(*pos);
+  addToPool(*newState);
+  nearState->addChild(*newState);
 }
 
 void RRT::printPool()

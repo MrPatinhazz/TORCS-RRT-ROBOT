@@ -36,7 +36,7 @@ static void shutdown(int index);
 /* Support function prototypes */
 
 /* Updates the text debug window */
-void updateTextWindow(tSituation* situation, MyCar* myCar, Pathfinder* mpf);
+void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 ////////////////////////////////////////////////
 
 static const char *botname[BOTS] = {
@@ -212,12 +212,12 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
 	// Creates the Stats and path window
-	if (!windowCreated)
+	if (windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
 		dwind = new DWindow(_w, _h, myc, myrrt, myTrackDesc, mpf);
-		windowCreated = true;
+		//windowCreated = true;
 	}
 
 	b1 = b2 = b3 = b4 = b5 = 0.0;
@@ -227,8 +227,8 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	myc->update(myTrackDesc, car, situation);
 
 	//Updates debug window string information
-	if(windowCreated)
-	updateTextWindow(situation, myc, mpf);
+	if (windowCreated)
+		updateTextWindow(situation, myc, mpf);
 
 	//G.init = Add the goal state. Its the car current location. also adds another node
 	//TODO: START WHEN OVERTAKING
@@ -243,9 +243,9 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	//Nearest - finds the closest, already connected state and adds the last random state to it
 	if (treeInit)
 	{
-		for(int j = _STF; j--;)
+		for (int j = _STF; j--;)
 		{
-			randpos = RandomGen::CTAPos(myTrack,myTrackDesc);
+			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
 			minIndex = -1;
 			minStDist = 9999;
 
@@ -255,12 +255,13 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 				if (dist > 0 && dist < minStDist)
 				{
-					minStDist = dist; minIndex = k;
+					minStDist = dist;
+					minIndex = k;
 				}
 			};
 
-			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(),&randpos);
-			if(Util::isPosValid(myTrack,myTrackDesc,&step))
+			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
+			if (Util::isPosValid(myTrack, myTrackDesc, &step))
 			{
 				myrrt->addState(myrrt->getAt(minIndex), &step);
 			}
@@ -268,8 +269,8 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//Updates display window
-	if(windowCreated)
-	dwind->Redisplay();
+	if (windowCreated)
+		dwind->Redisplay();
 
 	/* decide how we want to drive */
 	if (car->_dammage < myc->undamaged / 3 && myc->bmode != myc->NORMAL)
@@ -617,7 +618,7 @@ static int pitcmd(int index, tCarElt *car, tSituation *s)
 }
 
 /* Updates the text debug window */
-void updateTextWindow(tSituation* situation, MyCar* myc, Pathfinder* mpf)
+void updateTextWindow(tSituation *situation, MyCar *myc, Pathfinder *mpf)
 {
 	searchrange = MAX((int)ceil(situation->deltaTime * myc->getSpeed() + 1.0) * 2, 4);
 	currentsegid = mpf->getCurrentSegment(myc->getCarPtr(), searchrange);

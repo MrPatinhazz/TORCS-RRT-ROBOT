@@ -24,7 +24,7 @@ public:
     string getInfoS() { return infoS; };
     void setInfoS(string str) { infoS = str; };
 
-    void DWindow::setRRT(RRT *mrrt);
+    void setRRT(RRT *mrrt);
 
 private:
     int statsInt = 0;
@@ -33,15 +33,15 @@ private:
 };
 
 //Stats Window display refresh and text render
-void drawWindowStats();
+void drawStatsWindow();
 void printText(int x, int y, char *string);
 
 //Path window display refresh and drawings render
-void drawWindowPath();
+void drawPathWindow();
 void drawMapSegments();
 void drawPlan();
 void drawRRT();
-void drawHitbox();
+void drawHitbox(tCarElt* car);
 void drawCircle(tPosd point, GLfloat radius);
 void drawCircleP(v3d *pos, GLfloat radius);
 void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY);

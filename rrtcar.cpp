@@ -212,11 +212,11 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
 	// Creates the Stats and path window
-	if (windowCreated)
+	if (!windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
-		dwind = new DWindow(_w, _h, myc, myrrt, myTrackDesc, mpf);
+		dwind = new DWindow(_w, _h, myc, myrrt, myTrackDesc, mpf, ocar, situation);
 		windowCreated = true;
 	}
 

@@ -217,7 +217,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
 		dwind = new DWindow(_w, _h, myc, myrrt, myTrackDesc, mpf);
-		//windowCreated = true;
+		windowCreated = true;
 	}
 
 	b1 = b2 = b3 = b4 = b5 = 0.0;
@@ -261,7 +261,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 			};
 
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
-			if (Util::isPosValid(myTrack, myTrackDesc, &step))
+			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
 			{
 				myrrt->addState(myrrt->getAt(minIndex), &step);
 			}

@@ -17,12 +17,14 @@ class RRT;
 class DWindow
 {
 public:
-    DWindow(int w, int h, MyCar *, RRT *, TrackDesc *, Pathfinder *);
+    DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfinder *mpf, OtherCar *mOcar, Situation *mSit);
     ~DWindow();
     void Redisplay();
 
     string getInfoS() { return infoS; };
     void setInfoS(string str) { infoS = str; };
+
+    void DWindow::setRRT(RRT *mrrt);
 
 private:
     int statsInt = 0;
@@ -37,6 +39,9 @@ void printText(int x, int y, char *string);
 //Path window display refresh and drawings render
 void drawWindowPath();
 void drawMapSegments();
+void drawPlan();
+void drawRRT();
+void drawHitbox();
 void drawCircle(tPosd point, GLfloat radius);
 void drawCircleP(v3d *pos, GLfloat radius);
 void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY);

@@ -1,9 +1,20 @@
 #include "dwindow.h"
 
-#define MAPSEGWIDTH 1
+#define MAPSEGWIDTH 0.5
 #define CIRCLEWIDTH 5
-#define LINEWIDTH 1
-#define SCALE 0.5
+#define LINEWIDTH 1.2
+#define SCALE 1.5
+
+//GLCOLORS
+#define WHITE 1,1,1
+#define BLACK 0,0,0
+#define LGTGREY 0.839, 0.839, 0.839
+#define RED 1,0,0 
+#define ORANGE 1, 0.631, 0.058
+#define PURPLE 1, 0.160, 0.956
+#define BLUE 0,0,1
+#define GREEN 0, 0.501, 0.062
+#define YELLOW 1,1,0
 
 string infoString;
 
@@ -11,10 +22,12 @@ MyCar *dwCar;
 RRT *dwRRT;
 TrackDesc *dwTrDesc;
 Pathfinder *dwPf;
+OtherCar *dwOcar;
+Situation *dwSit;
 int nTSeg = 0;
 const GLfloat twicePi = PI * 2.0f;
 
-DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfinder *mpf)
+DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfinder *mpf, OtherCar *mOcar, Situation *mSit)
 {
 	glutSetOption(
 		GLUT_ACTION_ON_WINDOW_CLOSE,
@@ -24,16 +37,24 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	dwRRT = mrrt;
 	dwTrDesc = mtdesc;
 	dwPf = mpf;
+	dwOcar = mOcar;
+	dwSit = mSit;
 
-	glutInitWindowSize(600, 300);
+	glutInitWindowSize(300, 300);
 	statsInt = glutCreateWindow("Stats");
 	glutPositionWindow(720, 0);
-	glutDisplayFunc(drawWindowStats);
+	glutDisplayFunc(drawStatsWindow);
 
 	glutInitWindowSize(w * SCALE, h * SCALE);
 	pathInt = glutCreateWindow("Drawing path");
-	glutPositionWindow(720, 200);
-	glutDisplayFunc(drawWindowPath);
+	glutPositionWindow(690, 0);
+	glutDisplayFunc(drawPathWindow);
+}
+
+void DWindow::setRRT(RRT *mrrt)
+{
+	dwRRT = nullptr;
+	dwRRT = mrrt;
 }
 
 DWindow::~DWindow()
@@ -57,10 +78,10 @@ void DWindow::Redisplay()
 }
 
 // STATS WINDOWS FUNCTIONS
-void drawWindowStats()
+void drawStatsWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(1, 1, 1, 1);
+	glClearColor(WHITE, 1);
 
 	int w = glutGet(GLUT_WINDOW_WIDTH);
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
@@ -71,10 +92,8 @@ void drawWindowStats()
 	glLoadIdentity();
 	glOrtho(0.0f, w, h, 0.0f, 0.0f, 1.0f);
 	glPushMatrix();
-	glColor3f(0, 0, 0);
-	int x = 10;
-	int y = 30;
-	printText(x, y, (char *)infoString.c_str());
+	glColor3f(BLACK);
+	printText(10, 30, (char *)infoString.c_str());
 
 	glPopMatrix();
 	glutSwapBuffers();
@@ -92,10 +111,10 @@ void printText(int x, int y, char *string)
 }
 
 // PATH WINDOWS FUNCTIONS
-void drawWindowPath()
+void drawPathWindow()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.7, 0.7, 0.7, 0.7);
+	glClearColor(LGTGREY, 1);
 
 	int w = glutGet(GLUT_WINDOW_WIDTH);
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
@@ -108,26 +127,64 @@ void drawWindowPath()
 	glLoadIdentity();
 	glPushMatrix();
 
-	//DRAWING CYCLE
-	glColor3f(1, 0, 1);
-
 	//Draw map segments
+	glColor3f(BLACK);
 	drawMapSegments();
 
-	//Draws car current position
-	drawCircle(dwCar->getCarPtr()->pub.DynGCg.pos, 2);
+	//Draw Plan
+	//glColor3f(PURPLE);
+	//drawPlan();
+
+	//Draws other cars current position
+	for(int j = dwSit->raceInfo.ncars; j--;)
+	{
+		glColor3f(ORANGE);
+		drawCircleP(dwOcar[j].getCurrentPos(),2);
+		glColor3f(BLUE);
+		drawHitbox(dwOcar[j].getCarPtr());
+	}
+
+	//Draws own car current position
+	glColor3f(RED);
+	drawCircleP(dwCar->getCurrentPos(),2);
 
 	//Draws states position and connections
+	drawRRT();
+
+	glPopMatrix();
+	glutSwapBuffers();
+}
+
+void drawMapSegments()
+{
+	nTSeg = dwTrDesc->getnTrackSegments();
+	for (int i = 0; i <= nTSeg; i = i + 7)
+	{
+		drawCircleP(dwTrDesc->getSegmentPtr(i)->getLeftBorder(), MAPSEGWIDTH);
+		drawCircleP(dwTrDesc->getSegmentPtr(i)->getRightBorder(), MAPSEGWIDTH);
+	}
+}
+
+void drawPlan()
+{
+	for(int i = 0; i <= dwPf->getnPathSeg(); i = i + 7)
+	{
+		drawCircleP(dwPf->getPathSeg(i)->getOptLoc(),0.8);
+	}
+};
+
+void drawRRT()
+{
 	vector<State *> dwPool = dwRRT->getPool();
 	if (!dwPool.empty())
 	{
 		for (size_t j = dwPool.size(); j--;)
 		{
-			glColor3f(1, 1, 0);
+			glColor3f(YELLOW);
 			drawCircleP(dwPool[j]->getPos(), 1);
 
 			//Draws trees connections (edges)
-			glColor3f(1, 0, 0);
+			glColor3f(GREEN);
 			vector<State *> sChildren = dwPool[j]->getChildren();
 			if (!sChildren.empty())
 			{
@@ -138,21 +195,13 @@ void drawWindowPath()
 			}
 		}
 	}
-
-	//DRAWING CYCLE
-
-	glPopMatrix();
-	glutSwapBuffers();
 }
 
-void drawMapSegments()
+void drawHitbox(tCarElt *car)
 {
-	glColor3f(0, 0, 0);
-	nTSeg = dwTrDesc->getnTrackSegments();
-	for (int i = 0; i <= nTSeg; i = i + 7)
+	for(int c = 4; c--;)
 	{
-		drawCircleP(dwTrDesc->getSegmentPtr(i)->getLeftBorder(), MAPSEGWIDTH);
-		drawCircleP(dwTrDesc->getSegmentPtr(i)->getRightBorder(), MAPSEGWIDTH);
+		drawCircle(car->pub.corner[c],1.5);
 	}
 }
 
@@ -160,8 +209,8 @@ void drawCircle(tPosd point, GLfloat radius)
 {
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 
-	int x = (point.x * SCALE);
-	int y = h - (point.y * SCALE);
+	int x = (point.ax * SCALE);
+	int y = h - (point.ay * SCALE);
 
 	int i;
 	int triangleAmount = 30;

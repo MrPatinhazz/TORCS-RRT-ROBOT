@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const double _stepsize = 10;
+const double _stepsize = 7;
 
 //Random number/state generators
 class RandomGen
@@ -60,12 +60,35 @@ public:
 		return v3d(nx, ny, nearState->z);
 	};
 
-	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos)
+	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar* ocar)
 	{
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 		double distToBorder = distToPos - myTrack->width;
+
 		//< 0 - 2 to account for track margin
-		return (distToBorder < -7);
+		return distToBorder < -7 && isInside(0 , myTrack->max.x / 2, 0, myTrack->max.y/2,pos->x, pos->y) ;		
 	};
+
+	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)
+	{
+		return isBetween(x1,x2,xa) && isBetween(y1,y2,ya);
+	}
+
+	static bool isBetween(double p1, double p2, double a)
+	{
+		if(p1 >= p2 && a < p1 && a > p2 )
+		{
+			return true;
+		}
+		else if(p1 <= p2 && a < p2 && a > p1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
 };

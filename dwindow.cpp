@@ -12,7 +12,7 @@ RRT *dwRRT;
 TrackDesc *dwTrDesc;
 Pathfinder *dwPf;
 int nTSeg = 0;
-const GLfloat twicePi = PI*2.0f; 
+const GLfloat twicePi = PI * 2.0f;
 
 DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfinder *mpf)
 {

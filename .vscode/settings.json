@@ -1,0 +1,31 @@
+{
+    "files.exclude": {
+        "*.def": true,
+        "*.dsp": true,
+        "*.md": true,
+        "*.rgb": true,
+        "*.xcf": true,
+        "1/": true,
+        "2/": true,
+        "3/": true,
+        "4/": true,
+        "5/": true,
+        "6/": true,
+        "7/": true,
+        "8/": true,
+        "9/": true,
+        "10/": true,
+        ".gitignore": true,
+        "Makefile": true,
+        ".depend": true,
+        "*.xml": true,
+        "linalg.h": true,
+        "spline.cpp": true,
+        "spline.h": true,
+        "trackdesc.*":true,
+        "pathfinder.":true,
+        "*.o":true,
+        "*.so":true
+    },
+    "C_Cpp.clang_format_path": "/usr/bin/clang-format"
+}

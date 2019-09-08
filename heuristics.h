@@ -67,7 +67,7 @@ public:
 		double distToBorder = distToPos - myTrack->width;
 
 		//< 0 - 2 to account for track margin
-		return distToBorder < -7 && isInside(0 , myTrack->max.x / 2, 0, myTrack->max.y/2,pos->x, pos->y) ;		
+		return distToBorder < -7 && isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;		
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

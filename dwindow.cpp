@@ -1,10 +1,10 @@
 #include "dwindow.h"
 
-#define MAPSEGWIDTH 0.5
+#define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 1.2
-#define SCALE 1.5
-
+#define SCALE 1
+#define STEPSKIP 1
 //GLCOLORS
 #define WHITE 1,1,1
 #define BLACK 0,0,0
@@ -44,6 +44,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	statsInt = glutCreateWindow("Stats");
 	glutPositionWindow(720, 0);
 	glutDisplayFunc(drawStatsWindow);
+	
 
 	glutInitWindowSize(w * SCALE, h * SCALE);
 	pathInt = glutCreateWindow("Drawing path");
@@ -68,8 +69,10 @@ void DWindow::Redisplay()
 	infoString = getInfoS();
 	int gameplayWindow = glutGetWindow();
 
+	/*
 	glutSetWindow(statsInt);
 	glutPostRedisplay();
+	*/
 
 	glutSetWindow(pathInt);
 	glutPostRedisplay();
@@ -132,8 +135,8 @@ void drawPathWindow()
 	drawMapSegments();
 
 	//Draw Plan
-	//glColor3f(PURPLE);
-	//drawPlan();
+	glColor3f(PURPLE);
+	drawPlan();
 
 	//Draws other cars current position
 	for(int j = dwSit->raceInfo.ncars; j--;)
@@ -158,7 +161,7 @@ void drawPathWindow()
 void drawMapSegments()
 {
 	nTSeg = dwTrDesc->getnTrackSegments();
-	for (int i = 0; i <= nTSeg; i = i + 7)
+	for (int i = 0; i <= nTSeg; i = i + STEPSKIP)
 	{
 		drawCircleP(dwTrDesc->getSegmentPtr(i)->getLeftBorder(), MAPSEGWIDTH);
 		drawCircleP(dwTrDesc->getSegmentPtr(i)->getRightBorder(), MAPSEGWIDTH);
@@ -167,7 +170,7 @@ void drawMapSegments()
 
 void drawPlan()
 {
-	for(int i = 0; i <= dwPf->getnPathSeg(); i = i + 7)
+	for(int i = 0; i <= dwPf->getnPathSeg(); i = i + STEPSKIP)
 	{
 		drawCircleP(dwPf->getPathSeg(i)->getOptLoc(),0.8);
 	}

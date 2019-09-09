@@ -28,21 +28,25 @@ public:
     void setGraphIndex(int index) { graphIndex = index; };
 
     vector<State *> getChildren() { return children; };
-    void addChild(State &childState)
+    void addChild(State &childState, double dist)
     {
         children.emplace_back(&childState);
         childState.parent = &(*this);
         childState.graphIndex = childState.parent->graphIndex + 1;
+        childState.edgeCost = childState.parent->edgeCost + dist;
     };
     State *getParent() { return parent; };
 
+    double getEdgeCost(){return edgeCost;};
+    void setEdgeCost(double dist){this->edgeCost += dist;};
+
     void printChildren();
     void toString();
-    float distFromStart = 0;
 
 private:
     v3d pos;
     int graphIndex;
     State *parent;
     vector<State *> children;
+    double edgeCost;
 };

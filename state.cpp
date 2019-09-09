@@ -6,6 +6,7 @@ State::State()
   graphIndex = 0;
   parent = nullptr;
   children = {};
+  edgeCost = 0;
 }
 
 State::State(v3d npos)
@@ -14,6 +15,7 @@ State::State(v3d npos)
   graphIndex = 0;
   parent = nullptr;
   children = {};
+  edgeCost = 0;
 }
 
 State::~State()
@@ -29,7 +31,7 @@ void State::toString()
 
 void State::printChildren()
 {
-  for (size_t k = 0; k < children.size(); k++)
+  for (size_t k = children.size(); k--;)
   {
     children.at(0)->toString();
   }

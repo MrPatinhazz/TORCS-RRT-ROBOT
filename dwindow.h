@@ -41,7 +41,8 @@ void drawPathWindow();
 void drawMapSegments();
 void drawPlan();
 void drawRRT();
-void drawHitbox(tCarElt* car);
+void drawCorners(tCarElt* car);
+
 void drawCircle(tPosd point, GLfloat radius);
 void drawCircleP(v3d *pos, GLfloat radius);
 void drawLine(double initialPointX, double initialPointY, double finalPointX, double finalPointY);

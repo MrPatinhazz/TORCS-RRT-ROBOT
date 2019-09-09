@@ -16,11 +16,11 @@ RRT::~RRT()
   statePool.clear();
 }
 
-void RRT::addState(State *nearState, v3d *pos)
+void RRT::addState(State *nearState, v3d *pos, double dist)
 {
   State *newState = new State(*pos);
   addToPool(*newState);
-  nearState->addChild(*newState);
+  nearState->addChild(*newState, dist);
 }
 
 void RRT::printPool()

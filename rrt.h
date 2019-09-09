@@ -19,7 +19,7 @@ public:
 
     vector<State *> getPool() { return statePool; };
     void addToPool(State &newState) { statePool.emplace_back(&newState); };
-    void addState(State *nearState, v3d *pos);
+    void addState(State *nearState, v3d *pos, double dist);
     State *getAt(int index) { return statePool.at(index); };
 
     State *getRoot() { return statePool.front(); };

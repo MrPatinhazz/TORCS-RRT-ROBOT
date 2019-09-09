@@ -95,8 +95,8 @@ int frame, searchrange, currentsegid = 0, minIndex;
 double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
-//States per frame
-const int _STF = 20;
+//Neighboor states (defined by NBR_RADIUS)
+int _inNbr = 0;
 
 static MyCar *mycar[BOTS] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static OtherCar *ocar = NULL;
@@ -176,6 +176,9 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 
 	//start seed
 	srand(time(0));
+
+	//clear console
+	cout << "\033[2J\033[1;1H";
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -240,30 +243,44 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		treeInit = true;
 	}
 
-	//Nearest - finds the closest, already connected state and adds the last random state to it
+	//If the tree has already started, lets expand it - frame%x - do it each x times
 	if (treeInit)
 	{
-		for (int j = _STF; j--;)
+
+		// do it STF times each frame
+		for (int j = STF; j--;)
 		{
 			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
 			minIndex = -1;
 			minStDist = 9999;
+			_inNbr = 0;
 
+			// Check the distance of already connected state
 			for (size_t k = myrrt->getPool().size(); k--;)
 			{
-				double dist = Dist::eucl(randpos, *myrrt->getPool().at(k)->getPos());
+				double dist = Dist::eucl(randpos, *myrrt->getAt(k)->getPos());
 
 				if (dist > 0 && dist < minStDist)
 				{
 					minStDist = dist;
 					minIndex = k;
 				}
-			};
+			}
 
+			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
 			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
 			{
-				myrrt->addState(myrrt->getAt(minIndex), &step);
+				myrrt->addState(myrrt->getAt(minIndex), &step, STEPSIZE);
+			}
+
+			for (size_t n = 0; n < myrrt->getPool().size() - 1; n++)
+			{
+				int edgeDif = Dist::eucl(step, *myrrt->getAt(n)->getPos());
+				if (edgeDif <= NBR_RADIUS)
+				{
+					_inNbr++;
+				}
 			}
 		}
 	}

@@ -8,7 +8,12 @@
 
 using namespace std;
 
-const double _stepsize = 7;
+//Branch (step) size
+#define STEPSIZE 7
+//Neighboorhood (close states) radius
+#define NBR_RADIUS 10
+//States per frame
+#define STF 5
 
 //Random number/state generators
 class RandomGen
@@ -55,8 +60,8 @@ public:
 	static v3d step(v3d *nearState, v3d *randPos)
 	{
 		double angle = Trig::angleBetween(nearState, randPos);
-		double nx = nearState->x + (_stepsize * sin(DEG2RAD(angle)));
-		double ny = nearState->y + (_stepsize * cos(DEG2RAD(angle)));
+		double nx = nearState->x + (STEPSIZE * sin(DEG2RAD(angle)));
+		double ny = nearState->y + (STEPSIZE * cos(DEG2RAD(angle)));
 		return v3d(nx, ny, nearState->z);
 	};
 

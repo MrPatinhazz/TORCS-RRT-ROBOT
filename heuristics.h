@@ -8,12 +8,16 @@
 
 using namespace std;
 
+//Security margin (measured from mid segment). 
+#define SEGMARGIN 4
 //Branch (step) size
-#define STEPSIZE 7
+#define STEPSIZE 4
 //Neighboorhood (close states) radius
 #define NBR_RADIUS 10
-//States per frame
-#define STF 5
+//States per frame if applied
+#define STF 100
+//The tree expands each EXPFREQ frames if appleid
+#define EXPFREQ 
 
 //Random number/state generators
 class RandomGen
@@ -67,12 +71,12 @@ public:
 
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar* ocar)
 	{
+		//Ignores validation 
+		//return true;
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
-		double distToBorder = distToPos - myTrack->width;
-
-		//< 0 - 2 to account for track margin
-		return distToBorder < -7 && isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;		
+		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
+		return (distToPos < SEGMARGIN);
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

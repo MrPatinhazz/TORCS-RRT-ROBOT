@@ -37,6 +37,7 @@ static void shutdown(int index);
 
 /* Updates the text debug window */
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
+void treeExpand(int ktimes);
 ////////////////////////////////////////////////
 
 static const char *botname[BOTS] = {
@@ -95,8 +96,8 @@ int frame, searchrange, currentsegid = 0, minIndex;
 double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
-//Neighboor states (defined by NBR_RADIUS)
-int _inNbr = 0;
+//Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
+int _inNbr = 0, minEdgeDif = 99999, minEdIndex;
 
 static MyCar *mycar[BOTS] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static OtherCar *ocar = NULL;
@@ -177,8 +178,16 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//start seed
 	srand(time(0));
 
-	//clear console
+	//clear Linux console
 	cout << "\033[2J\033[1;1H";
+
+	//G.Init - Temp location.
+	State *initState = new State(*myTrackDesc->getSegmentPtr(0)->getMiddle());
+	myrrt->addToPool(*initState);
+	myrrt->getRoot()->setGraphIndex(0);
+	treeInit = true;
+
+	treeExpand(100000);
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -232,58 +241,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	//Updates debug window string information
 	if (windowCreated)
 		updateTextWindow(situation, myc, mpf);
-
-	//G.init = Add the goal state. Its the car current location. also adds another node
-	//TODO: START WHEN OVERTAKING
-	if (frame % 100 == 0 && !treeInit)
-	{
-		State *initState = new State(*myc->getCurrentPos());
-		myrrt->addToPool(*initState);
-		myrrt->getRoot()->setGraphIndex(0);
-		treeInit = true;
-	}
-
-	//If the tree has already started, lets expand it - frame%x - do it each x times
-	if (treeInit)
-	{
-
-		// do it STF times each frame
-		for (int j = STF; j--;)
-		{
-			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
-			minIndex = -1;
-			minStDist = 9999;
-			_inNbr = 0;
-
-			// Check the distance of already connected state
-			for (size_t k = myrrt->getPool().size(); k--;)
-			{
-				double dist = Dist::eucl(randpos, *myrrt->getAt(k)->getPos());
-
-				if (dist > 0 && dist < minStDist)
-				{
-					minStDist = dist;
-					minIndex = k;
-				}
-			}
-
-			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
-			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
-			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
-			{
-				myrrt->addState(myrrt->getAt(minIndex), &step, STEPSIZE);
-			}
-
-			for (size_t n = 0; n < myrrt->getPool().size() - 1; n++)
-			{
-				int edgeDif = Dist::eucl(step, *myrrt->getAt(n)->getPos());
-				if (edgeDif <= NBR_RADIUS)
-				{
-					_inNbr++;
-				}
-			}
-		}
-	}
 
 	//Updates display window
 	if (windowCreated)
@@ -647,4 +604,40 @@ void updateTextWindow(tSituation *situation, MyCar *myc, Pathfinder *mpf)
 				 " Z:" + to_string(strpos->z) +
 				 "-Seg:" + to_string(currentsegid);
 	dwind->setInfoS(str);
+}
+
+/*Expands the tree k times*/
+void treeExpand(int ktimes)
+{
+	//If the tree has already started, lets expand it - frame%x - do it each x times
+	//if (treeInit && frame % EXPFREQ == 0)
+	if (treeInit)
+	{
+		// do it STF times each frame
+		for (int j = ktimes; j--;)
+		{
+			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
+			minIndex = -1;
+			minStDist = 9999;
+
+			// Check the distance of already connected state
+			for (size_t k = myrrt->getPool().size(); k--;)
+			{
+				double dist = Dist::eucl(randpos, *myrrt->getAt(k)->getPos());
+
+				if (dist > 0 && dist < minStDist)
+				{
+					minStDist = dist;
+					minIndex = k;
+				}
+			}
+
+			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
+			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
+			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
+			{
+				myrrt->addState(myrrt->getAt(minIndex), &step, STEPSIZE);
+			}
+		}
+	}
 }

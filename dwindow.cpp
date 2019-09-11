@@ -132,10 +132,11 @@ void drawPathWindow()
 	glLoadIdentity();
 	glPushMatrix();
 
-	
+	/*
 	//Draw map segments
 	glColor3f(BLACK);
 	drawMapSegments();
+	*/
 	
 	/*
 	//Draw Plan

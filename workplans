@@ -1,7 +1,3 @@
-De momento nao consigo devolver o endereco do nodo q esta mais proximo na arvore
-fica sempre a nullptr apesar de devolver a medida
-tenho q arranjar forma de passar os enderecos para as funcoes correctamentes
-
 The algorithm that constructs an RRT is shown in Figure 5.
 A simple iteration is performed in which each step attempts
 to extend the RRT by adding a new vertex that is biased by a
@@ -36,3 +32,22 @@ RRT.init(qinit) <- goal state (current car location)
         if yes, add vertex(qNew) and add edge(qNear, qNew)
 
     return tree
+
+
+	_inNbr = 0;
+
+	/* RRT* - Still in consideration. Dont know if its worth it or not.
+	for (size_t n = 0; n < myrrt->getPool().size() - 1; n++)
+	{
+		int edgeDif = Dist::eucl(step, *myrrt->getAt(n)->getPos());
+		if (edgeDif <= NBR_RADIUS)
+			{
+				_inNbr++;
+				cout << myrrt->getAt(n)->getEdgeCost() << "  ";
+			}
+	}
+		cout << endl << _inNbr << endl;
+		cout << "________" << endl;
+		*/
+
+in line 273~ rrtcar cpp. I dont know if i should do RRT* do to edge length restriction. A rewired edge may be too long for efficient traversal.

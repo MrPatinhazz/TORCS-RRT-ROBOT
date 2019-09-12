@@ -33,12 +33,33 @@ static int pitcmd(int index, tCarElt *car, tSituation *s);
 static void shutdown(int index);
 /***********************/
 
-/* Support function prototypes */
+//* Added functions and variables */
 
 /* Updates the text debug window */
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 void treeExpand(int ktimes);
-////////////////////////////////////////////////
+
+//RRT class - holds the state pool and functions
+static RRT *myrrt = nullptr;
+//Debug window class and functions
+DWindow *dwind = nullptr;
+//Information string written on debug window
+v3d *strpos = {};
+//Rand position
+v3d randpos = {};
+//Track holder
+tTrack *myTrack = nullptr;
+//Does debug window exist? // Has the tree started?
+bool windowCreated, treeInit = false;
+//Frame, seg search range, current track segment, closest state index
+int frame, searchrange, currentsegid = 0, minIndex;
+//Distance tracker of all states, Angle between rand and near states
+double minStDist = 99999;
+//Current track width
+tdble trackWidth = 0;
+//Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
+int _inNbr = 0, minEdgeDif = 99999, minEdIndex;
+//******************************************************************************************/
 
 static const char *botname[BOTS] = {
 	"rrtcar 1", "rrtcar 2", "rrtcar 3", "rrtcar 4", "rrtcar 5",
@@ -77,27 +98,6 @@ static int InitFuncPt(int index, void *pt)
 	itf->index = index;
 	return 0;
 }
-
-//RRT class - holds the state pool and functions
-static RRT *myrrt = nullptr;
-//Debug window class and functions
-DWindow *dwind = nullptr;
-//Information string written on debug window
-v3d *strpos = {};
-//Rand position
-v3d randpos = {};
-//Track holder
-tTrack *myTrack = nullptr;
-//Does debug window exist? // Has the tree started?
-bool windowCreated, treeInit = false;
-//Frame, seg search range, current track segment, closest state index
-int frame, searchrange, currentsegid = 0, minIndex;
-//Distance tracker of all states, Angle between rand and near states
-double minStDist = 99999;
-//Current track width
-tdble trackWidth = 0;
-//Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
-int _inNbr = 0, minEdgeDif = 99999, minEdIndex;
 
 static MyCar *mycar[BOTS] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static OtherCar *ocar = NULL;
@@ -169,10 +169,10 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	fuel *= (situation->_totLaps + 1.0);
 	GfParmSetNum(*carParmHandle, SECT_CAR, PRM_FUEL, (char *)NULL, MIN(fuel, 100.0));
 
-	//Creates RRT with an empty state pool
+	//* Creates RRT with an empty state pool
 	myrrt = new RRT();
 
-	//Saves the pointer to Torcs Track and its width
+	//* Saves the pointer to Torcs Track and its width
 	myTrack = myTrackDesc->getTorcsTrack();
 
 	//start seed
@@ -181,20 +181,34 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//clear Linux console
 	cout << "\033[2J\033[1;1H";
 
-	//G.Init - Temp location.
-	State *initState = new State(*myTrackDesc->getSegmentPtr(0)->getMiddle());
+	//* G.Init - Temp location.
+	State *initState = new State(*myTrackDesc->getSegmentPtr(200)->getMiddle());
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
 	treeInit = true;
 
-	//Expand the tree in k POSSIBLE nodes
+	//* Expand the tree in k POSSIBLE nodes
 	treeExpand(TREESIZE);
-	cout << myrrt->getPool().size() << endl;
-	int goalIndex = fRand(0,myrrt->getPool().size());
-	cout << goalIndex << endl;
-	myrrt->addToPathV(*myrrt->getAt(goalIndex));
-	//Copies every state from the goal to the source to the pathVec
-	myrrt->backtrack();	
+
+	//* Finds the closest node to the selected track segment and adds it to path, making it a goal
+	v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
+	double segDist = -1, minSegDist = DBL_MAX;
+	int minSegIndex = -1;
+
+	for(size_t i = myrrt->getPool().size();i--;)
+	{
+		segDist = Dist::eucl(goalSeg, *myrrt->getAt(i)->getPos());
+
+		if (segDist > 0 && segDist < minSegDist)
+		{
+			minSegDist = segDist;
+			minSegIndex = i;
+		}	
+	}
+	myrrt->addToPathV(*myrrt->getAt(minSegIndex));
+
+	//* Copies every state from the goal to the source to the pathVec
+	myrrt->backtrack();
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -335,6 +349,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	targetAngle -= car->_yaw;
 	NORM_PI_PI(targetAngle);
 	steer = targetAngle / car->_steerLock;
+	//* CHANGES HERE */
 
 	/* brakes */
 	tdble brakecoeff = 1.0 / (2.0 * g * myc->currentseg->getKfriction() * myc->CFRICTION);
@@ -620,7 +635,7 @@ void treeExpand(int ktimes)
 	//if (treeInit && frame % EXPFREQ == 0)
 	if (treeInit)
 	{
-		// do it STF times each frame
+		// do it STF times each frame || do it ktimes
 		for (int j = ktimes; j--;)
 		{
 			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);

@@ -50,7 +50,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 
 	glutInitWindowSize(w * SCALE, h * SCALE);
 	pathInt = glutCreateWindow("Drawing path");
-	glutPositionWindow(200, 0);
+	glutPositionWindow(800, 0);
 	glutDisplayFunc(drawPathWindow);
 }
 
@@ -132,17 +132,13 @@ void drawPathWindow()
 	glLoadIdentity();
 	glPushMatrix();
 
-	/*
 	//Draw map segments
 	glColor3f(BLACK);
 	drawMapSegments();
-	*/
 		
-	/*
 	//Draw Plan
 	glColor3f(PURPLE);
 	drawPlan();
-	*/
 
 	//Draws other cars current position
 	/*
@@ -159,8 +155,10 @@ void drawPathWindow()
 	glColor3f(RED);
 	drawCircleP(dwCar->getCurrentPos(),2);
 
+	/*
 	//Draws states position and connections
 	drawRRT();
+	*/
 
 	//Draws RRT Path
 	drawPath();

@@ -25,7 +25,6 @@ public:
     
     vector<State *> getPathV() { return pathVec; };
     void addToPathV(State &goalState) {pathVec.emplace_back(&goalState);};
-    State *getGoal() {return pathVec.front();};
     void backtrack();
 
     void printPool();

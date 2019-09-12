@@ -187,7 +187,14 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	myrrt->getRoot()->setGraphIndex(0);
 	treeInit = true;
 
-	treeExpand(100000);
+	//Expand the tree in k POSSIBLE nodes
+	treeExpand(TREESIZE);
+	cout << myrrt->getPool().size() << endl;
+	int goalIndex = fRand(0,myrrt->getPool().size());
+	cout << goalIndex << endl;
+	myrrt->addToPathV(*myrrt->getAt(goalIndex));
+	//Copies every state from the goal to the source to the pathVec
+	myrrt->backtrack();	
 }
 
 /* initialize driver for the race, called for every selected driver */

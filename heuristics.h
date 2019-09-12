@@ -8,16 +8,18 @@
 
 using namespace std;
 
+//Tree Size
+#define TREESIZE 90000
 //Security margin (measured from mid segment). 
-#define SEGMARGIN 4
+#define SEGMARGIN 2
 //Branch (step) size
-#define STEPSIZE 4
+#define STEPSIZE 5
 //Neighboorhood (close states) radius
 #define NBR_RADIUS 10
 //States per frame if applied
 #define STF 100
-//The tree expands each EXPFREQ frames if appleid
-#define EXPFREQ 
+//The tree expands each EXPFREQ frames if applied
+#define EXPFREQ 1
 
 //Random number/state generators
 class RandomGen

@@ -30,3 +30,16 @@ void RRT::printPool()
     statePool.at(k)->toString();
   }
 }
+
+void RRT::backtrack()
+{
+  if(!pathVec.empty())
+  {
+    State* currState = pathVec.back();
+    while(currState->getParent() != nullptr)
+    {
+      pathVec.emplace_back(currState->getParent());
+      currState = currState->getParent();
+    }
+  }
+}

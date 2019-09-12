@@ -3,8 +3,8 @@
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 0.7
-#define SCALE 1
-#define STEPSKIP 7
+#define SCALE 1.5
+#define STEPSKIP 8
 //GLCOLORS
 #define WHITE 1,1,1
 #define BLACK 0,0,0
@@ -50,7 +50,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 
 	glutInitWindowSize(w * SCALE, h * SCALE);
 	pathInt = glutCreateWindow("Drawing path");
-	glutPositionWindow(720, 0);
+	glutPositionWindow(200, 0);
 	glutDisplayFunc(drawPathWindow);
 }
 
@@ -137,7 +137,7 @@ void drawPathWindow()
 	glColor3f(BLACK);
 	drawMapSegments();
 	*/
-	
+		
 	/*
 	//Draw Plan
 	glColor3f(PURPLE);
@@ -159,9 +159,11 @@ void drawPathWindow()
 	glColor3f(RED);
 	drawCircleP(dwCar->getCurrentPos(),2);
 
-
 	//Draws states position and connections
 	drawRRT();
+
+	//Draws RRT Path
+	drawPath();
 
 	glPopMatrix();
 	glutSwapBuffers();
@@ -192,11 +194,14 @@ void drawRRT()
 	{
 		for (size_t j = dwPool.size(); j--;)
 		{
+			/*
+			Draws nbr radius on the last state added
 			if(j == dwPool.size()-1)
 			{
 				glColor3f(RED);
 				drawCircleP(dwPool[j]->getPos(),NBR_RADIUS);
 			}
+			*/
 
 			glColor3f(YELLOW);
 			drawCircleP(dwPool[j]->getPos(), 1);
@@ -211,6 +216,19 @@ void drawRRT()
 					drawLine(dwPool[j], sChildren[k]);
 				}
 			}
+		}
+	}
+}
+
+void drawPath()
+{
+	vector<State *> dwPath = dwRRT->getPathV();
+	if (!dwPath.empty())
+	{
+		for(size_t j = dwPath.size(); j--;)
+		{
+			glColor3f(BLUE);
+			drawCircleP(dwPath[j]->getPos(),2);
 		}
 	}
 }

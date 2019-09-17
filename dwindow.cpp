@@ -50,7 +50,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 
 	glutInitWindowSize(w * SCALE, h * SCALE);
 	pathInt = glutCreateWindow("Drawing path");
-	glutPositionWindow(800, 0);
+	glutPositionWindow(200, 0);
 	glutDisplayFunc(drawPathWindow);
 }
 
@@ -226,7 +226,7 @@ void drawPath()
 		for(size_t j = dwPath.size(); j--;)
 		{
 			glColor3f(BLUE);
-			drawCircleP(dwPath[j]->getPos(),2);
+			drawCircleP(dwPath[j]->getPos(),0.5);
 		}
 	}
 }
@@ -269,7 +269,7 @@ void drawCircleP(v3d *pos, GLfloat radius)
 	int y = h - (pos->y * SCALE);
 
 	int i;
-	int triangleAmount = 30;
+	int triangleAmount = 25;
 
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(CIRCLEWIDTH);

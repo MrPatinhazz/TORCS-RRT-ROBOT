@@ -817,7 +817,6 @@ void Pathfinder::plan(int trackSegId, tCarElt *car, tSituation *situation, MyCar
 		if ((myc->derror > myc->PATHERR * myc->PATHERRFACTOR ||
 			 (myc->getDeltaPitch() > myc->MAXALLOWEDPITCH && myc->getSpeed() > myc->FLYSPEED)))
 		{
-			//std::cout<<"Need to change my path"<<std::endl;
 			changed += correctPath(trackSegId, car, myc);
 		}
 		/* overtaking */
@@ -1540,7 +1539,7 @@ int Pathfinder::overtake(int trackSegId, tSituation *s, MyCar *myc, OtherCar *oc
 			ps[j].setLoc(ps[j].getOptLoc());
 		}
 
-		/* align previos point for getting correct speedsqr in Pathfinder::plan(...) */
+		/* align previous point for getting correct speedsqr in Pathfinder::plan(...) */
 		int p = (trackSegId - 1 + nPathSeg) % nPathSeg;
 		int e = (trackSegId + 1 + nPathSeg) % nPathSeg;
 		smooth(trackSegId, p, e, 1.0);

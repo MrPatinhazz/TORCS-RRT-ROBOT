@@ -37,7 +37,7 @@ static void shutdown(int index);
 
 /* Updates the text debug window */
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
-void treeExpand(int ktimes);
+void treeExpand();
 
 //RRT class - holds the state pool and functions
 static RRT *myrrt = nullptr;
@@ -185,11 +185,18 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	State *initState = new State(*myTrackDesc->getSegmentPtr(200)->getMiddle());
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
-	treeInit = true;
+	//treeInit = true;
 
-	//* Expand the tree in k POSSIBLE nodes
-	treeExpand(TREESIZE);
-
+	if(treeInit)
+	{
+	//* Expand the tree TREESIZE nodes
+	do
+	{
+		treeExpand();
+		cout << myrrt->getPool().size() << endl;
+	}
+	while(myrrt->getPool().size() < TREESIZE);
+	
 	//* Finds the closest node to the selected track segment and adds it to path, making it a goal
 	v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
 	double segDist = -1, minSegDist = DBL_MAX;
@@ -206,9 +213,11 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 		}	
 	}
 	myrrt->addToPathV(*myrrt->getAt(minSegIndex));
+	
 
 	//* Copies every state from the goal to the source to the pathVec
 	myrrt->backtrack();
+	}
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -245,7 +254,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
 	// Creates the Stats and path window
-	if (!windowCreated)
+	if (windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
@@ -629,14 +638,14 @@ void updateTextWindow(tSituation *situation, MyCar *myc, Pathfinder *mpf)
 }
 
 /*Expands the tree k times*/
-void treeExpand(int ktimes)
+void treeExpand()
 {
 	//If the tree has already started, lets expand it - frame%x - do it each x times
 	//if (treeInit && frame % EXPFREQ == 0)
 	if (treeInit)
 	{
 		// do it STF times each frame || do it ktimes
-		for (int j = ktimes; j--;)
+		for (int j = 500; j--;)
 		{
 			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
 			minIndex = -1;

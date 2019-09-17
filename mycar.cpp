@@ -196,10 +196,11 @@ void MyCar::update(TrackDesc *track, tCarElt *car, tSituation *situation)
 		l = l + pf->getPathSeg(destsegid)->getLength();
 		destsegid = (destsegid + 1 + pf->getnPathSeg()) % pf->getnPathSeg();
 	}
-
 	currentseg = track->getSegmentPtr(currentsegid);
-
 	destseg = track->getSegmentPtr(destsegid);
+
+	//* CHANGES HERE */
+
 	currentpathseg = pf->getPathSeg(currentsegid);
 	updateDError();
 	int lookahead = (destsegid + (int)(MIN(LOOKAHEAD_MAX_ERROR, derror) * speed * LOOKAHEAD_FACTOR)) % pf->getnPathSeg();

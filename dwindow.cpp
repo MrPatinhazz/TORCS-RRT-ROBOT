@@ -183,6 +183,9 @@ void drawPlan()
 	{
 		drawCircleP(dwPf->getPathSeg(i)->getOptLoc(),0.8);
 	}
+
+	glColor3f(RED);
+	drawCircleP(dwPf->getPathSeg(200)->getOptLoc(),5);
 };
 
 void drawRRT()
@@ -226,9 +229,11 @@ void drawPath()
 		for(size_t j = dwPath.size(); j--;)
 		{
 			glColor3f(BLUE);
-			drawCircleP(dwPath[j]->getPos(),0.5);
+			drawCircleP(dwPath[j]->getPos(),0.8);
 		}
 	}
+	glColor3f(YELLOW);
+	drawCircleP(dwPath[dwPath.size()-1]->getPos(),1);
 }
 
 void drawCorners(tCarElt *car)

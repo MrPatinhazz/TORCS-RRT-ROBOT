@@ -28,12 +28,14 @@ RRT.init(qinit) <- goal state (current car location)
 
 in line 273~ rrtcar cpp. I dont know if i should do RRT* do to edge length restriction. A rewired edge may be too long for efficient traversal.
 
-Ideia inicial: tenho q definir , desenhar e por o carro a seguir o trilho q eu definir. Ja tenho o vector de apontadores para os estados q vao compor o trilho. o inicio por agora e a root da statePool. fica facil definir um goal "random" e fazer backtrack ate a root. depois de construir a arvore toda 
-	setGoal(statepool[random])
-	if(parent != null)
-		copy this -> pathVec
-		currentState -> parent
-	else
-		stop 
+eu sei que ele segue o "plan" deliniado pelo k1999
+a ideia agora era fazer com q, em vez de ele seguir o plan, fizesse um offset aos nodos mais proximos do k1999 de modo a q ficasse igual ao RRT naquele troço. 
 
-pra ele seguir preciso de investigar ainda. possivelmente alguma cena a ver com o PID.	
+foreach x in pathVec:
+	foreach n in plan:
+		dist = euclDist(x,n)
+		minIndex = n.index
+		if dist < minDist 
+			minDist = dist
+
+	plan[n].pos = x.pos	

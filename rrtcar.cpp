@@ -49,16 +49,18 @@ v3d *strpos = {};
 v3d randpos = {};
 //Track holder
 tTrack *myTrack = nullptr;
-//Does debug window exist? // Has the tree started?
-bool windowCreated, treeInit = false;
-//Frame, seg search range, current track segment, closest state index
-int frame, searchrange, currentsegid = 0, minIndex;
+//Does debug window exist? // Has the tree started? // Has the path been adjusted
+bool windowCreated, treeInit, pathAdjusted;
+//Frame, seg search range, current track segment, closest state index, closest path 2 segment index
+int frame, searchrange, currentsegid = 0, minIndex, p2sMinIndex;
+//Path 2 state distace, min distance;
+double p2sDist, p2sMinDist;
 //Distance tracker of all states, Angle between rand and near states
 double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
 //Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
-int _inNbr = 0, minEdgeDif = 99999, minEdIndex;
+//int _inNbr = 0, minEdgeDif = 99999, minEdIndex;
 //******************************************************************************************/
 
 static const char *botname[BOTS] = {
@@ -185,7 +187,7 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	State *initState = new State(*myTrackDesc->getSegmentPtr(200)->getMiddle());
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
-	//treeInit = true;
+	treeInit = true;
 
 	if(treeInit)
 	{
@@ -193,7 +195,10 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	do
 	{
 		treeExpand();
-		cout << myrrt->getPool().size() << endl;
+		if(myrrt->getPool().size() % 2000 < 10)
+		{
+			cout << myrrt->getPool().size() << endl;
+		}
 	}
 	while(myrrt->getPool().size() < TREESIZE);
 	
@@ -254,7 +259,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
 	// Creates the Stats and path window
-	if (windowCreated)
+	if (!windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
@@ -312,6 +317,39 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	/* compute path according to the situation */
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
+	size_t pathSize = myrrt->getPathV().size();
+	//* CHANGES HERE */
+
+	if(!pathAdjusted)
+	{
+		cout << "Path size " << pathSize << endl;
+		cout << "N path seg " << mpf->getnPathSeg() << endl;
+		cout << "Track segs " << myTrackDesc->getnTrackSegments() << endl;
+				
+		for(size_t n = 200; n < 600; n++)
+		{
+			p2sMinDist = DBL_MAX;
+			p2sDist = 0;
+			p2sMinIndex = -1;
+
+			for(size_t i = myrrt->getPathV().size();i--;)
+			{
+				p2sDist = Dist::eucl(*mpf->getPathSeg(n)->getOptLoc(), *myrrt->getPathV().at(i)->getPos());
+
+				if (p2sDist < p2sMinDist)
+				{
+					p2sMinDist = p2sDist;
+					p2sMinIndex = i;
+				}	
+			}
+			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(p2sMinIndex)->getPos());
+			cout << "Closest index" << p2sMinIndex << endl;
+		}
+		pathAdjusted = true;
+	}
+
+	//mpf->getPathSeg(200)->setOptLoc(myrrt->getPathV().at(0)->getPos());
+
 
 	/* clear ctrl structure with zeros and set the current gear */
 	std::memset(&car->ctrl, 0, sizeof(tCarCtrl));
@@ -358,7 +396,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	targetAngle -= car->_yaw;
 	NORM_PI_PI(targetAngle);
 	steer = targetAngle / car->_steerLock;
-	//* CHANGES HERE */
 
 	/* brakes */
 	tdble brakecoeff = 1.0 / (2.0 * g * myc->currentseg->getKfriction() * myc->CFRICTION);

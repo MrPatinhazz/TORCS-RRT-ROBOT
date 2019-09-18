@@ -13,7 +13,7 @@ using namespace std;
 //Security margin (measured from mid segment). 
 #define SEGMARGIN 2
 //Branch (step) size
-#define STEPSIZE 0.1
+#define STEPSIZE 0.2
 //Neighboorhood (close states) radius
 #define NBR_RADIUS 10
 //States per frame if applied

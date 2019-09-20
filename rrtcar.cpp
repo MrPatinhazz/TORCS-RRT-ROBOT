@@ -34,10 +34,9 @@ static void shutdown(int index);
 /***********************/
 
 //* Added functions and variables */
-
-/* Updates the text debug window */
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 void treeExpand();
+int findMinIndex(v3d pos, vector<State *> list);
 
 //RRT class - holds the state pool and functions
 static RRT *myrrt = nullptr;
@@ -51,16 +50,14 @@ v3d randpos = {};
 tTrack *myTrack = nullptr;
 //Does debug window exist? // Has the tree started? // Has the path been adjusted
 bool windowCreated, treeInit, pathAdjusted;
-//Frame, seg search range, current track segment, closest state index, closest path 2 segment index
-int frame, searchrange, currentsegid = 0, minIndex, p2sMinIndex;
+//Frame, seg search range, current track segment, closest path 2 segment index
+int frame, searchrange, currentsegid = 0, p2sMinIndex;
 //Path 2 state distace, min distance;
 double p2sDist, p2sMinDist;
-//Distance tracker of all states, Angle between rand and near states
-double minStDist = 99999;
 //Current track width
 tdble trackWidth = 0;
 //Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
-//int _inNbr = 0, minEdgeDif = 99999, minEdIndex;
+int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1;
 //******************************************************************************************/
 
 static const char *botname[BOTS] = {
@@ -189,39 +186,29 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	myrrt->getRoot()->setGraphIndex(0);
 	treeInit = true;
 
-	if(treeInit)
+	if (treeInit && !ITERGROWTH)
 	{
-	//* Expand the tree TREESIZE nodes
-	do
-	{
-		treeExpand();
-		if(myrrt->getPool().size() % 2000 < 10)
+		do
 		{
-			cout << myrrt->getPool().size() << endl;
+			treeExpand();
+			if (myrrt->getPool().size() % 2000 < 50)
+			{
+				cout << myrrt->getPool().size() << endl;
+			}
+		} while (myrrt->getPool().size() < TREESIZE);
+
+		//* Expand the tree TREESIZE nodes
+
+		if (MAKEPATH)
+		{
+			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
+			v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
+			int minIndex = findMinIndex(goalSeg, myrrt->getPool());
+			myrrt->addToPathV(*myrrt->getAt(minIndex));
+
+			//* Copies every state from the goal to the source to the pathVec
+			myrrt->backtrack();
 		}
-	}
-	while(myrrt->getPool().size() < TREESIZE);
-	
-	//* Finds the closest node to the selected track segment and adds it to path, making it a goal
-	v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
-	double segDist = -1, minSegDist = DBL_MAX;
-	int minSegIndex = -1;
-
-	for(size_t i = myrrt->getPool().size();i--;)
-	{
-		segDist = Dist::eucl(goalSeg, *myrrt->getAt(i)->getPos());
-
-		if (segDist > 0 && segDist < minSegDist)
-		{
-			minSegDist = segDist;
-			minSegIndex = i;
-		}	
-	}
-	myrrt->addToPathV(*myrrt->getAt(minSegIndex));
-	
-
-	//* Copies every state from the goal to the source to the pathVec
-	myrrt->backtrack();
 	}
 }
 
@@ -258,8 +245,8 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	MyCar *myc = mycar[index - 1];
 	Pathfinder *mpf = myc->getPathfinderPtr();
 
-	// Creates the Stats and path window
-	if (!windowCreated)
+	//* Creates the Stats and path window
+	if (DRAWWIN && !windowCreated)
 	{
 		int _w = (myTrack->max.x) - (myTrack->min.x);
 		int _h = (myTrack->max.y) - (myTrack->min.y);
@@ -275,11 +262,10 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	//Updates debug window string information
 	if (windowCreated)
+	{
 		updateTextWindow(situation, myc, mpf);
-
-	//Updates display window
-	if (windowCreated)
 		dwind->Redisplay();
+	}
 
 	/* decide how we want to drive */
 	if (car->_dammage < myc->undamaged / 3 && myc->bmode != myc->NORMAL)
@@ -317,39 +303,19 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	/* compute path according to the situation */
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
-	size_t pathSize = myrrt->getPathV().size();
+
 	//* CHANGES HERE */
-
-	if(!pathAdjusted)
+	if (MAKEPATH && !pathAdjusted)
 	{
-		cout << "Path size " << pathSize << endl;
-		cout << "N path seg " << mpf->getnPathSeg() << endl;
-		cout << "Track segs " << myTrackDesc->getnTrackSegments() << endl;
-				
-		for(size_t n = 200; n < 600; n++)
+		for (size_t n = 200; n < 600; n++)
 		{
-			p2sMinDist = DBL_MAX;
-			p2sDist = 0;
-			p2sMinIndex = -1;
-
-			for(size_t i = myrrt->getPathV().size();i--;)
-			{
-				p2sDist = Dist::eucl(*mpf->getPathSeg(n)->getOptLoc(), *myrrt->getPathV().at(i)->getPos());
-
-				if (p2sDist < p2sMinDist)
-				{
-					p2sMinDist = p2sDist;
-					p2sMinIndex = i;
-				}	
-			}
-			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(p2sMinIndex)->getPos());
+			int minIndex = findMinIndex(*mpf->getPathSeg(n)->getOptLoc(), myrrt->getPathV());
+			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(minIndex)->getPos());
 			cout << "Closest index" << p2sMinIndex << endl;
 		}
 		pathAdjusted = true;
 	}
-
-	//mpf->getPathSeg(200)->setOptLoc(myrrt->getPathV().at(0)->getPos());
-
+	//* CHANGES HERE */
 
 	/* clear ctrl structure with zeros and set the current gear */
 	std::memset(&car->ctrl, 0, sizeof(tCarCtrl));
@@ -682,24 +648,11 @@ void treeExpand()
 	if (treeInit)
 	{
 		// do it STF times each frame || do it ktimes
-		for (int j = 500; j--;)
+		for (int j = STF; j--;)
 		{
 			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
-			minIndex = -1;
-			minStDist = 9999;
 
-			// Check the distance of already connected state
-			for (size_t k = myrrt->getPool().size(); k--;)
-			{
-				double dist = Dist::eucl(randpos, *myrrt->getAt(k)->getPos());
-
-				if (dist > 0 && dist < minStDist)
-				{
-					minStDist = dist;
-					minIndex = k;
-				}
-			}
-
+			int minIndex = findMinIndex(randpos, myrrt->getPool());
 			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
 			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
@@ -708,4 +661,24 @@ void treeExpand()
 			}
 		}
 	}
+}
+
+//Finds the minimum distance index in list, searching within list size
+int findMinIndex(v3d pos, vector<State *> list)
+{
+	int minIndex = -1;
+	double minStDist = 9999;
+	double dist = -1;
+
+	for (size_t k = list.size(); k--;)
+	{
+		dist = Dist::eucl(pos, *list.at(k)->getPos());
+
+		if (dist > 0 && dist < minStDist)
+		{
+			minStDist = dist;
+			minIndex = k;
+		}
+	}
+	return minIndex;
 }

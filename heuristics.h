@@ -1,5 +1,5 @@
 /** 
- * Support functions and RRT heuristics
+ * Support functions and RRT heuristics & parameters
 */
 
 #pragma once
@@ -8,18 +8,24 @@
 
 using namespace std;
 
+//Draws window
+#define DRAWWIN 1
+//Makes path
+#define MAKEPATH 1
+//If tree grows iterativelly or completly offline
+#define ITERGROWTH 0
 //Tree Size
-#define TREESIZE 16000
-//Security margin (measured from mid segment). 
+#define TREESIZE 8000
+//Security margin (measured from mid segment). - Recomended > 16k
 #define SEGMARGIN 2
-//Branch (step) size
-#define STEPSIZE 0.2
+//Branch (step) size - Recommended < 0.5
+#define STEPSIZE 1
 //Neighboorhood (close states) radius
-#define NBR_RADIUS 10
-//States per frame if applied
-#define STF 100
-//The tree expands each EXPFREQ frames if applied
-#define EXPFREQ 1
+#define NBR_RADIUS 5
+//States per frame (if ITERGROWTH)
+#define STF 50
+//The tree expands each EXPFREQ frames (if ITERGROWTH)
+#define EXPFREQ 50
 
 //Random number/state generators
 class RandomGen

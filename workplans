@@ -1,15 +1,4 @@
 
-RRT.init(qinit) <- goal state (current car location)
-    for k = 1 to K (or time, choose whats best)
-        qRand = RandConf() <- rand valid state , done
-        qnear = Nearest_Vertex(qRand, Tree) <- pick the nearest point in the tree to expand it later. partially done
-        qNew = NewConf(qRand, qNear, Tree) <- a new state between qRand and qNear , linearlly interpolated
-        Check if its possible to reach the new node before adding it
-        if yes, add vertex(qNew) and add edge(qNear, qNew)
-
-    return tree
-
-
 	_inNbr = 0;
 
 	/* RRT* - Still in consideration. Dont know if its worth it or not.
@@ -28,14 +17,37 @@ RRT.init(qinit) <- goal state (current car location)
 
 in line 273~ rrtcar cpp. I dont know if i should do RRT* do to edge length restriction. A rewired edge may be too long for efficient traversal.
 
-eu sei que ele segue o "plan" deliniado pelo k1999
-a ideia agora era fazer com q, em vez de ele seguir o plan, fizesse um offset aos nodos mais proximos do k1999 de modo a q ficasse igual ao RRT naquele troço. 
+////////////////////////////////////////////////////////////////////////
 
-foreach x in pathVec:
-	foreach n in plan:
-		dist = euclDist(x,n)
-		minIndex = n.index
-		if dist < minDist 
-			minDist = dist
+**
+v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
+double segDist = -1
+minSegDist = DBL_MAX;
+int minSegIndex = -1;
 
-	plan[n].pos = x.pos	
+for (size_t i = myrrt->getPool().size(); i--;)
+	{
+		segDist = Dist::eucl(goalSeg, *myrrt->getAt(i)->getPos());
+		if (segDist > 0 && segDist < minSegDist)
+		{
+			minSegDist = segDist;
+			minSegIndex = i;
+		}
+	}
+myrrt->addToPathV(*myrrt->getAt(minSegIndex));
+
+**
+p2sMinDist = DBL_MAX;
+p2sDist = 0;
+p2sMinIndex = -1;
+
+for (size_t i = myrrt->getPathV().size(); i--;)
+	{
+		p2sDist = Dist::eucl(*mpf->getPathSeg(n)->getOptLoc(), *myrrt->getPathV().at(i)->getPos());
+		if (p2sDist < p2sMinDist)
+		{
+			p2sMinDist = p2sDist;
+			p2sMinIndex = i;
+		}
+	}
+mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(p2sMinIndex)->getPos());

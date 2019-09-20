@@ -9,15 +9,15 @@
 using namespace std;
 
 //RRT Parameters
-#define DRAWWIN 1	 // Draws window
-#define MAKEPATH 0	// Makes path
-#define SEGMARGIN 2   // Security margin (measured from mid segment)
-#define STEPSIZE 1	//Branch (step) size - Recommended < 0.5
-#define TREESIZE 8000 // Tree Size - Recomended > 16k
-#define ITERGROWTH 1  // If tree grows iteratively (1) or completly offline (0)
-#define STF 50		  //States per frame (if ITERGROWTH)
-#define EXPFREQ 50	//The tree expands each EXPFREQ frames (if ITERGROWTH)
-#define NBR_RADIUS 5  //Neighboorhood (close states) radius
+#define DRAWWIN 1	  // Draws window
+#define MAKEPATH 0	 // Makes path
+#define SEGMARGIN 2	// Security margin (measured from mid segment)
+#define STEPSIZE 5	 // Branch (step) size - Recommended < 0.5
+#define TREESIZE 16000 // Tree Size - Recomended > 16k
+#define ITERGROWTH 1   // If tree grows iteratively (1) or completly offline (0)
+#define STF 50		   // States per frame (if ITERGROWTH)
+#define EXPFREQ 50	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
+#define NBR_RADIUS 5   // Neighboorhood (close states) radius
 
 //Random number/state generators
 class RandomGen
@@ -72,11 +72,11 @@ public:
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar *ocar)
 	{
 		//Ignores validation
-		//return true;
-		int closestid = myTrackDesc->getNearestId(pos);
-		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+		return true;
+		//int closestid = myTrackDesc->getNearestId(pos);
+		//double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
-		return (distToPos < SEGMARGIN);
+		//return (distToPos < SEGMARGIN);
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)
@@ -98,5 +98,24 @@ public:
 		{
 			return false;
 		}
+	}
+
+	static int findMinIndex(v3d pos, vector<State *> list)
+	{
+		int minIndex = -1;
+		double minStDist = 9999;
+		double dist = -1;
+
+		for (size_t k = list.size(); k--;)
+		{
+			dist = Dist::eucl(pos, *list.at(k)->getPos());
+
+			if (dist > 0 && dist < minStDist)
+			{
+				minStDist = dist;
+				minIndex = k;
+			}
+		}
+		return minIndex;
 	}
 };

@@ -8,24 +8,16 @@
 
 using namespace std;
 
-//Draws window
-#define DRAWWIN 1
-//Makes path
-#define MAKEPATH 1
-//If tree grows iterativelly or completly offline
-#define ITERGROWTH 0
-//Tree Size
-#define TREESIZE 8000
-//Security margin (measured from mid segment). - Recomended > 16k
-#define SEGMARGIN 2
-//Branch (step) size - Recommended < 0.5
-#define STEPSIZE 1
-//Neighboorhood (close states) radius
-#define NBR_RADIUS 5
-//States per frame (if ITERGROWTH)
-#define STF 50
-//The tree expands each EXPFREQ frames (if ITERGROWTH)
-#define EXPFREQ 50
+//RRT Parameters
+#define DRAWWIN 1	 // Draws window
+#define MAKEPATH 0	// Makes path
+#define SEGMARGIN 2   // Security margin (measured from mid segment)
+#define STEPSIZE 1	//Branch (step) size - Recommended < 0.5
+#define TREESIZE 8000 // Tree Size - Recomended > 16k
+#define ITERGROWTH 1  // If tree grows iteratively (1) or completly offline (0)
+#define STF 50		  //States per frame (if ITERGROWTH)
+#define EXPFREQ 50	//The tree expands each EXPFREQ frames (if ITERGROWTH)
+#define NBR_RADIUS 5  //Neighboorhood (close states) radius
 
 //Random number/state generators
 class RandomGen
@@ -77,9 +69,9 @@ public:
 		return v3d(nx, ny, nearState->z);
 	};
 
-	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar* ocar)
+	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar *ocar)
 	{
-		//Ignores validation 
+		//Ignores validation
 		//return true;
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
@@ -89,16 +81,16 @@ public:
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)
 	{
-		return isBetween(x1,x2,xa) && isBetween(y1,y2,ya);
+		return isBetween(x1, x2, xa) && isBetween(y1, y2, ya);
 	}
 
 	static bool isBetween(double p1, double p2, double a)
 	{
-		if(p1 >= p2 && a < p1 && a > p2 )
+		if (p1 >= p2 && a < p1 && a > p2)
 		{
 			return true;
 		}
-		else if(p1 <= p2 && a < p2 && a > p1)
+		else if (p1 <= p2 && a < p2 && a > p1)
 		{
 			return true;
 		}
@@ -106,6 +98,5 @@ public:
 		{
 			return false;
 		}
-		
 	}
 };

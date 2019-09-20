@@ -16,38 +16,3 @@
 		*/
 
 in line 273~ rrtcar cpp. I dont know if i should do RRT* do to edge length restriction. A rewired edge may be too long for efficient traversal.
-
-////////////////////////////////////////////////////////////////////////
-
-**
-v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
-double segDist = -1
-minSegDist = DBL_MAX;
-int minSegIndex = -1;
-
-for (size_t i = myrrt->getPool().size(); i--;)
-	{
-		segDist = Dist::eucl(goalSeg, *myrrt->getAt(i)->getPos());
-		if (segDist > 0 && segDist < minSegDist)
-		{
-			minSegDist = segDist;
-			minSegIndex = i;
-		}
-	}
-myrrt->addToPathV(*myrrt->getAt(minSegIndex));
-
-**
-p2sMinDist = DBL_MAX;
-p2sDist = 0;
-p2sMinIndex = -1;
-
-for (size_t i = myrrt->getPathV().size(); i--;)
-	{
-		p2sDist = Dist::eucl(*mpf->getPathSeg(n)->getOptLoc(), *myrrt->getPathV().at(i)->getPos());
-		if (p2sDist < p2sMinDist)
-		{
-			p2sMinDist = p2sDist;
-			p2sMinIndex = i;
-		}
-	}
-mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(p2sMinIndex)->getPos());

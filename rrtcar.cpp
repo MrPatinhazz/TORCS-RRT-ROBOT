@@ -186,19 +186,16 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	myrrt->getRoot()->setGraphIndex(0);
 	treeInit = true;
 
-	if (treeInit && !ITERGROWTH)
+	if (!ITERGROWTH)
 	{
+		//* Expand the tree TREESIZE nodes
 		do
 		{
 			treeExpand();
-			if (myrrt->getPool().size() % 2000 < 50)
-			{
-				cout << myrrt->getPool().size() << endl;
-			}
 		} while (myrrt->getPool().size() < TREESIZE);
 
-		//* Expand the tree TREESIZE nodes
-
+		//* Connects init to goal - TEMP
+		// TODO ; MAKE THE GOAL AND START DYNAMIC
 		if (MAKEPATH)
 		{
 			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
@@ -265,6 +262,11 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	{
 		updateTextWindow(situation, myc, mpf);
 		dwind->Redisplay();
+	}
+
+	if (ITERGROWTH && myrrt->getPool().size() < TREESIZE)
+	{
+		treeExpand();
 	}
 
 	/* decide how we want to drive */
@@ -643,9 +645,7 @@ void updateTextWindow(tSituation *situation, MyCar *myc, Pathfinder *mpf)
 /*Expands the tree k times*/
 void treeExpand()
 {
-	//If the tree has already started, lets expand it - frame%x - do it each x times
-	//if (treeInit && frame % EXPFREQ == 0)
-	if (treeInit)
+	if ((ITERGROWTH && frame % EXPFREQ == 0) || !ITERGROWTH)
 	{
 		// do it STF times each frame || do it ktimes
 		for (int j = STF; j--;)
@@ -663,7 +663,8 @@ void treeExpand()
 	}
 }
 
-//Finds the minimum distance index in list, searching within list size
+/*Finds the minimum distance index in list, searching within list size, measuring
+* between pos and list.element->pos */
 int findMinIndex(v3d pos, vector<State *> list)
 {
 	int minIndex = -1;

@@ -38,22 +38,15 @@ void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 void treeExpand();
 int findMinIndex(v3d pos, vector<State *> list);
 
-//RRT class - holds the state pool and functions
-static RRT *myrrt = nullptr;
-//Debug window class and functions
-DWindow *dwind = nullptr;
-//Track holder
-tTrack *myTrack = nullptr;
-//Information string written on debug window
-v3d *strpos = {};
-//Rand position
-v3d randpos = {};
-//Does debug window exist? // Has the tree started? // Has the path been adjusted
-bool windowCreated, treeInit, pathAdjusted;
-//Current frame
-int frame = 0;
+static RRT *myrrt = nullptr;	//RRT class - holds the state pool and functions
+DWindow *dwind = nullptr;	//Debug window class and functions
+tTrack *myTrack = nullptr;	//Track holder
+v3d *strpos = {};	//Pos written on dwindow
+v3d randpos = {};	//Rand position
+bool windowCreated, treeInit, pathAdjusted;	//Does debug window exist? // Has the tree started? // Has the path been adjusted
+int frame = 0;	//Current frame
 //Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
-int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1;
+//int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1;
 //******************************************************************************************/
 
 static const char *botname[BOTS] = {
@@ -177,9 +170,9 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	State *initState = new State(*myTrackDesc->getSegmentPtr(200)->getMiddle());
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
-	treeInit = true;
+	//treeInit = true;
 
-	if (!ITERGROWTH)
+	if (!ITERGROWTH && treeInit)
 	{
 		//* Expand the tree TREESIZE nodes
 		do

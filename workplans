@@ -15,4 +15,7 @@
 		cout << "________" << endl;
 		*/
 
-in line 273~ rrtcar cpp. I dont know if i should do RRT* do to edge length restriction. A rewired edge may be too long for efficient traversal.
+//////////////////////////////////////////////////
+com 1 adversario apenas é simples, mas com varios adversarios preciso de detetar dinamicamente qual o carro mais proximo a ultrapassar. senao me engano o pathfinder faz isso.
+
+em seguida, preciso de identificar um ponto x segmentos à frente desse adversario e ai fazer o backtracking para a minha atual posicao

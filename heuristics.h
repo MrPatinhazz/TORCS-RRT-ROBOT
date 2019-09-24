@@ -12,9 +12,9 @@ using namespace std;
 #define DRAWWIN 1	  // Draws window
 #define MAKEPATH 0	 // Makes path
 #define SEGMARGIN 2	// Security margin (measured from mid segment)
-#define STEPSIZE 5	 // Branch (step) size - Recommended < 0.5
+#define STEPSIZE 0.3 // Branch (step) size - Recommended < 0.5
 #define TREESIZE 16000 // Tree Size - Recomended > 16k
-#define ITERGROWTH 1   // If tree grows iteratively (1) or completly offline (0)
+#define ITERGROWTH 0   // If tree grows iteratively (1) or completly offline (0)
 #define STF 50		   // States per frame (if ITERGROWTH)
 #define EXPFREQ 50	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
 #define NBR_RADIUS 5   // Neighboorhood (close states) radius

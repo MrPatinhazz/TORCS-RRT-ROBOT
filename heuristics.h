@@ -72,11 +72,11 @@ public:
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar *ocar)
 	{
 		//Ignores validation
-		return true;
-		//int closestid = myTrackDesc->getNearestId(pos);
-		//double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+		//return true;
+		int closestid = myTrackDesc->getNearestId(pos);
+		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
-		//return (distToPos < SEGMARGIN);
+		return (distToPos < SEGMARGIN);
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

@@ -16,6 +16,18 @@
 		*/
 
 //////////////////////////////////////////////////
-com 1 adversario apenas é simples, mas com varios adversarios preciso de detetar dinamicamente qual o carro mais proximo a ultrapassar. senao me engano o pathfinder faz isso.
 
-em seguida, preciso de identificar um ponto x segmentos à frente desse adversario e ai fazer o backtracking para a minha atual posicao
+INICIO E GOAL DINAMICOS:
+	1) Desenhar um segmento a x segmentos do carro. A frente e atras e igual [FEITO]
+	2) Guardar essa posicao/pointer do segmento. vou precisar pa fazer backtrack
+
+NOTA: Tecnicamente so preciso da posicao do carro q tou mais proximo de ultrapassar. Portanto ate posso desenhar todos estes pontos agora (so por questoes de teste) mas o ponto q preciso mesmo e o do carro mais proximo. o pathfinder encontra isso (falta saber ao certo aonde). Ja tenho os ciclos feitos no dwindow, falta repetir no drive e passar um v3d pro desenho.
+
+	3) Detetar se estamos proximos desse ponto/posicao
+
+
+//////////////////////////////////////////////////
+O OptLoc e calculado logo de inicio e e estatico, nao muda. O Loc e dinamico , cada ponto muda sempre que o carro
+esta a LOOKAHEAD distancia desse. 
+
+O carro segue o Loc com alguma margem. Caso a margem de erro nao o permita. 

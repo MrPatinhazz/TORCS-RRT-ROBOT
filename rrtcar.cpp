@@ -45,8 +45,7 @@ v3d *strpos = {};	//Pos written on dwindow
 v3d randpos = {};	//Rand position
 bool windowCreated, treeInit, pathAdjusted;	//Does debug window exist? // Has the tree started? // Has the path been adjusted
 int frame = 0;	//Current frame
-//Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
-//int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1;
+//int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1; //Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
 //******************************************************************************************/
 
 static const char *botname[BOTS] = {
@@ -170,7 +169,7 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	State *initState = new State(*myTrackDesc->getSegmentPtr(200)->getMiddle());
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
-	//treeInit = true;
+	//treeInit = true; //* INITS THE RRT
 
 	if (!ITERGROWTH && treeInit)
 	{
@@ -294,13 +293,13 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	/* compute path according to the situation */
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 
-	//* CHANGES HERE */
+	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
 	if (MAKEPATH && !pathAdjusted)
 	{
 		for (size_t n = 200; n < 600; n++)
 		{
 			int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getOptLoc(), myrrt->getPathV());
-			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(minIndex)->getPos());
+			mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
 		}
 		pathAdjusted = true;
 	}

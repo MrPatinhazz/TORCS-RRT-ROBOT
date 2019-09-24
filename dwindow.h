@@ -42,6 +42,7 @@ void drawMapSegments();
 void drawPlan();
 void drawRRT();
 void drawCorners(tCarElt* car);
+void drawPos();
 void drawPath();
 
 void drawCircle(tPosd point, GLfloat radius);

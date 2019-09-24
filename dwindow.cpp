@@ -3,11 +3,11 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPATH 0	 // RRT init-goal path
 #define DRAWPLAN 0	 // K1999 plan
-#define DRAWRRT 0	  // RRT full tree
 #define DRAWMAP 1	  // Map segments
 #define DRAWPOS 1	  // Car(s) position
+#define DRAWPATH 0	 // RRT init-goal path
+#define DRAWRRT 0	  // RRT full tree
 
 //DRAW PARAMS
 #define MAPSEGWIDTH 1
@@ -15,6 +15,8 @@
 #define LINEWIDTH 0.7
 #define SCALE 1.5
 #define STEPSKIP 8
+#define LOOKBACKDIST 40
+#define LOOKAHEADDIST 40
 
 //GLCOLORS
 #define WHITE 1, 1, 1
@@ -37,6 +39,7 @@ OtherCar *dwOcar;
 Situation *dwSit;
 int nTSeg = 0;
 const GLfloat twicePi = PI * 2.0f;
+int currSeg = 0;
 
 DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfinder *mpf, OtherCar *mOcar, Situation *mSit)
 {
@@ -63,7 +66,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	{
 		glutInitWindowSize(w * SCALE, h * SCALE);
 		pathInt = glutCreateWindow("Drawing path");
-		glutPositionWindow(200, 0);
+		glutPositionWindow(720, 0);
 		glutDisplayFunc(drawPathWindow);
 	}
 }
@@ -165,20 +168,10 @@ void drawPathWindow()
 		drawPlan();
 	}
 
-	//Draws other cars current position
+	//Draws all cars current position
 	if (DRAWPOS)
 	{
-		for (int j = dwSit->raceInfo.ncars; j--;)
-		{
-			glColor3f(ORANGE);
-			drawCircleP(dwOcar[j].getCurrentPos(), 2);
-			glColor3f(BLUE);
-			drawCorners(dwOcar[j].getCarPtr());
-		}
-
-		//Draws own car current position
-		glColor3f(RED);
-		drawCircleP(dwCar->getCurrentPos(), 2);
+		drawPos();
 	}
 
 	//Draws states position and connections
@@ -199,8 +192,7 @@ void drawPathWindow()
 
 void drawMapSegments()
 {
-	nTSeg = dwTrDesc->getnTrackSegments();
-	for (int i = 0; i <= nTSeg; i = i + STEPSKIP)
+	for (int i = 0; i <= dwTrDesc->getnTrackSegments(); i = i + STEPSKIP)
 	{
 		drawCircleP(dwTrDesc->getSegmentPtr(i)->getLeftBorder(), MAPSEGWIDTH);
 		drawCircleP(dwTrDesc->getSegmentPtr(i)->getRightBorder(), MAPSEGWIDTH);
@@ -213,9 +205,12 @@ void drawPlan()
 	{
 		drawCircleP(dwPf->getPathSeg(i)->getOptLoc(), 0.8);
 	}
+	glColor3f(GREEN);
 
-	glColor3f(RED);
-	drawCircleP(dwPf->getPathSeg(200)->getOptLoc(), 5);
+	for (int i = 0; i <= dwPf->getnPathSeg(); i = i + STEPSKIP)
+	{
+		drawCircleP(dwPf->getPathSeg(i)->getLoc(), 0.8);
+	}
 };
 
 void drawRRT()
@@ -270,6 +265,45 @@ void drawCorners(tCarElt *car)
 	{
 		drawCircle(car->pub.corner[c], 1.5);
 	}
+}
+
+void drawPos()
+{
+	nTSeg = dwTrDesc->getnTrackSegments();
+
+	for (int j = dwSit->raceInfo.ncars; j--;)
+	{
+		currSeg = dwOcar[j].getCurrentSegId();
+
+		glColor3f(ORANGE);
+		drawCircleP(dwOcar[j].getCurrentPos(), 2);
+
+		glColor3f(BLUE);
+		drawCorners(dwOcar[j].getCarPtr());
+
+		glColor3f(YELLOW);
+		int lookBackIndex = currSeg - LOOKBACKDIST;
+		if (lookBackIndex < 0)
+		{
+			// nSeg - (LBR - CurrSeg). ex 300 - (40-39) = 299
+			lookBackIndex = nTSeg - (LOOKBACKDIST - currSeg);
+		}
+		v3d *backpos = dwTrDesc->getSegmentPtr(lookBackIndex)->getMiddle();
+		drawCircleP(backpos, 2);
+
+		int lookAheadIndex = currSeg + LOOKAHEADDIST;
+		if (lookAheadIndex >= nTSeg)
+		{
+			// ex (300 + 40) - 300 = 40
+			lookAheadIndex -= nTSeg;
+		}
+		v3d *frontpos = dwTrDesc->getSegmentPtr(lookAheadIndex)->getMiddle();
+		drawCircleP(frontpos, 2);
+	}
+
+	//Draws own car current position
+	glColor3f(RED);
+	drawCircleP(dwCar->getCurrentPos(), 2);
 }
 
 void drawCircle(tPosd point, GLfloat radius)

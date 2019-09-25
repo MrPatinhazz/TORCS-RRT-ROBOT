@@ -169,7 +169,7 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	State *initState = new State(*myTrackDesc->getSegmentPtr(200)->getMiddle());
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
-	//treeInit = true; //* INITS THE RRT
+	treeInit = true; //* INITS THE RRT
 
 	if (!ITERGROWTH && treeInit)
 	{
@@ -178,19 +178,6 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 		{
 			treeExpand();
 		} while (myrrt->getPool().size() < TREESIZE);
-
-		//* Connects init to goal - TEMP
-		// TODO ; MAKE THE GOAL AND START DYNAMIC
-		if (MAKEPATH)
-		{
-			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
-			v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
-			int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
-			myrrt->addToPathV(*myrrt->getAt(minIndex));
-
-			//* Copies every state from the goal to the source to the pathVec
-			myrrt->backtrack();
-		}
 	}
 }
 
@@ -251,10 +238,12 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//* If growth is iterative && tree size not reached, expand
+	/*
 	if (ITERGROWTH && myrrt->getPool().size() < TREESIZE)
 	{
 		treeExpand();
 	}
+	*/
 
 	/* decide how we want to drive */
 	if (car->_dammage < myc->undamaged / 3 && myc->bmode != myc->NORMAL)
@@ -294,15 +283,37 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 
 	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
-	if (MAKEPATH && !pathAdjusted)
+	cout << frame << endl;
+	if(frame % 1000 == 0)
 	{
-		for (size_t n = 200; n < 600; n++)
-		{
-			int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getOptLoc(), myrrt->getPathV());
-			mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
+		if (MAKEPATH && !pathAdjusted)
+		{ 
+			// TODO ; MAKE THE GOAL AND START DYNAMIC
+
+			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
+			v3d goalSeg = *myTrackDesc->getSegmentPtr(600)->getMiddle();
+			int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
+			myrrt->addToPathV(*myrrt->getAt(minIndex));
+
+			//* Copies every state from the goal to the source to the pathVec
+			myrrt->backtrack();
+
+			for (size_t n = 200; n < 600; n++)
+			{
+				int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getOptLoc(), myrrt->getPathV());
+				mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
+			}
+			pathAdjusted = true;
 		}
-		pathAdjusted = true;
 	}
+
+	/*
+	for(int nc = 0; nc < situation->_ncars -1; nc++)
+	{
+		cout << mpf->gettOCar()[nc].dist << " ";
+	}
+	cout << endl;
+	*/
 	//* CHANGES HERE */
 
 	/* clear ctrl structure with zeros and set the current gear */

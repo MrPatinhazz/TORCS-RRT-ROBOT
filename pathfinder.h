@@ -153,6 +153,7 @@ public:
 	inline int getnPathSeg() { return nPathSeg; }
 	inline double getPitSpeedSqrLimit() { return pitspeedsqrlimit; }
 	double distToPath(int trackSegId, v3d *p);
+	tOCar* gettOCar(){return o;}; //* ADDED //
 
 private:
 	static const double COLLDIST; /* up to this distance do we consider other cars as dangerous */

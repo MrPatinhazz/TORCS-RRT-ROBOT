@@ -11,9 +11,15 @@ RRT::~RRT()
 {
   for (size_t k = 0; k < statePool.size(); k++)
   {
-    statePool.at(k)->~State();
+    statePool[k]->~State();
   }
   statePool.clear();
+
+  for (size_t k = 0; k < pathVec.size(); k++)
+  {
+    pathVec[k]->~State();
+  }
+  pathVec.clear();
 }
 
 void RRT::addState(State *nearState, v3d *pos, double dist)
@@ -42,4 +48,8 @@ void RRT::backtrack()
       currState = currState->getParent();
     }
   }
+  else
+  {
+    cout << "Path vector empty, impossible to backtrack" << endl;
+  }  
 }

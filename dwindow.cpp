@@ -3,7 +3,7 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPLAN 0	 // K1999 plan
+#define DRAWPLAN 1	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
 #define DRAWPOS 1	  // Car(s) position
 #define DRAWPATH 1	 // RRT init-goal path

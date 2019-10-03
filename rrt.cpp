@@ -14,12 +14,6 @@ RRT::~RRT()
     statePool[k]->~State();
   }
   statePool.clear();
-
-  for (size_t k = 0; k < pathVec.size(); k++)
-  {
-    pathVec[k]->~State();
-  }
-  pathVec.clear();
 }
 
 void RRT::addState(State *nearState, v3d *pos, double dist)

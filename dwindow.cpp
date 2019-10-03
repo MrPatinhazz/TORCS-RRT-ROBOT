@@ -3,11 +3,11 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPLAN 1	 // K1999 plan
-#define DRAWMAP 1	  // Map segments
-#define DRAWPOS 1	  // Car(s) position
-#define DRAWPATH 1	 // RRT init-goal path
-#define DRAWRRT 0	  // RRT full tree
+#define DRAWPLAN 0	 // K1999 plan
+#define DRAWMAP 0	  // Map segments
+#define DRAWPOS 0	  // Car(s) position
+#define DRAWPATH 0	 // RRT init-goal path
+#define DRAWRRT 1	  // RRT full tree
 
 //DRAW PARAMS
 #define MAPSEGWIDTH 1
@@ -228,10 +228,10 @@ void drawRRT()
 			}
 
 			glColor3f(YELLOW);
-			drawCircleP(dwPool[j]->getPos(), 1);
+			drawCircleP(dwPool[j]->getPos(), 0.5);
 
 			//Draws trees connections (edges)
-			glColor3f(GREEN);
+			glColor3f(ORANGE);
 			vector<State *> sChildren = dwPool[j]->getChildren();
 			if (!sChildren.empty())
 			{
@@ -252,7 +252,7 @@ void drawPath()
 		for (size_t j = dwPath.size(); j--;)
 		{
 			glColor3f(BLUE);
-			drawCircleP(dwPath[j]->getPos(), 0.8);
+			drawCircleP(dwPath[j]->getPos(), 0.5);
 		}
 		glColor3f(YELLOW);
 		drawCircleP(dwPath[dwPath.size() - 1]->getPos(), 1);

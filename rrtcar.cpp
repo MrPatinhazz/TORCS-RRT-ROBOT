@@ -45,7 +45,7 @@ v3d *strpos = {};	//Pos written on dwindow
 v3d randpos = {};	//Rand position
 bool windowCreated, treeInit, pathAdjusted;	//Does debug window exist? // Has the tree started? // Has the path been adjusted
 int frame = 0;	//Current frame
-int startIndex = 200; int goalIndex = 250;
+int startIndex = 600; int goalIndex = 500;
 //int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1; //Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
 //******************************************************************************************/
 
@@ -285,29 +285,25 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
 	if(frame % 100 == 0) cout << frame << endl;
-	if(frame % 300  == 0) // TEMP
-	{
-		if (MAKEPATH && !pathAdjusted)
-		{ 
-			// TODO ; MAKE THE GOAL AND START DYNAMIC
-			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
-			v3d goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();
-			int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
-			myrrt->addToPathV(*myrrt->getAt(minIndex));
+	if (MAKEPATH && !pathAdjusted)
+	{ 
+		// TODO ; MAKE THE GOAL AND START DYNAMIC
+		//* Finds the closest node to the selected track segment and adds it to path, making it a goal
+		v3d goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();
+		int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
+		myrrt->addToPathV(*myrrt->getAt(minIndex));
+		
+		//* Copies every state from the goal to the source to the pathVec
+		myrrt->backtrack();
 
-			//* Copies every state from the goal to the source to the pathVec
-			myrrt->backtrack();
-
-			for (int n = startIndex; n < goalIndex; n++)
-			{
-				int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getLoc(), myrrt->getPathV());
-				mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
-			}
-			pathAdjusted = true;
+		for (int n = startIndex; n < goalIndex; n++)
+		{
+			int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getLoc(), myrrt->getPathV());
+			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(minIndex)->getPos());
 		}
+		pathAdjusted = true;
 	}
-	pathAdjusted = false; // TEMP
-
+	
 	/*
 	for(int nc = 0; nc < situation->_ncars -1; nc++)
 	{

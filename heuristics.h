@@ -10,10 +10,10 @@ using namespace std;
 
 //RRT Parameters
 #define DRAWWIN 1	  // Draws window
-#define MAKEPATH 1	 // Makes path
-#define SEGMARGIN 2	// Security margin (measured from mid segment)
-#define STEPSIZE 0.3 // Branch (step) size - Recommended < 0.5
-#define TREESIZE 16000 // Tree Size - Recomended > 16k
+#define MAKEPATH 0	 // Makes path
+#define SEGMARGIN 1	 // Security margin (measured from mid segment)
+#define STEPSIZE 2 // Branch (step) size - Recommended < 0.5
+#define TREESIZE 15000 // Tree Size - Recomended > 16k
 #define ITERGROWTH 0   // If tree grows iteratively (1) or completly offline (0)
 #define STF 50		   // States per frame (if ITERGROWTH)
 #define EXPFREQ 50	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
@@ -72,11 +72,11 @@ public:
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar *ocar)
 	{
 		//Ignores validation
-		//return true;
-		int closestid = myTrackDesc->getNearestId(pos);
-		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+		return true;
+		//int closestid = myTrackDesc->getNearestId(pos);
+		//double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
-		return (distToPos < SEGMARGIN);
+		//return (distToPos < SEGMARGIN);
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

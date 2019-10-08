@@ -33,6 +33,14 @@ void State::printChildren()
 {
   for (size_t k = children.size(); k--;)
   {
-    children.at(0)->toString();
+    cout << children[k] << " ";
   }
+}
+
+void State::addChild(State &childState, double dist)
+{
+  children.emplace_back(&childState);
+  childState.parent = &(*this);
+  childState.graphIndex = childState.parent->graphIndex + 1;
+  childState.edgeCost = childState.parent->edgeCost + dist;
 }

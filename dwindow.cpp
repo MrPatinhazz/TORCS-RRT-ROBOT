@@ -4,7 +4,7 @@
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
 #define DRAWPLAN 0	 // K1999 plan
-#define DRAWMAP 0	  // Map segments
+#define DRAWMAP 1	  // Map segments
 #define DRAWPOS 0	  // Car(s) position
 #define DRAWPATH 0	 // RRT init-goal path
 #define DRAWRRT 1	  // RRT full tree
@@ -221,14 +221,18 @@ void drawRRT()
 		for (size_t j = dwPool.size(); j--;)
 		{
 			//Draws nbr radius on the last state added
+			/*
 			if (j == dwPool.size() - 1)
 			{
-				glColor3f(RED);
+				glColor4f(RED,0.4);
 				drawCircleP(dwPool[j]->getPos(), NBR_RADIUS);
 			}
+			*/
 
-			glColor3f(YELLOW);
-			drawCircleP(dwPool[j]->getPos(), 0.5);
+			/*
+			glColor3f(BLUE);
+			drawCircleP(dwPool[j]->getPos(), 2);
+			*/
 
 			//Draws trees connections (edges)
 			glColor3f(ORANGE);

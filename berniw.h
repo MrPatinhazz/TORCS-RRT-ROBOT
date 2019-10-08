@@ -26,6 +26,8 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <list>
+#include <iterator> 
 
 #include <tgf.h>
 #include <track.h>

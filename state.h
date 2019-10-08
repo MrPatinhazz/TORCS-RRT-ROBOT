@@ -28,14 +28,11 @@ public:
     void setGraphIndex(int index) { graphIndex = index; };
 
     vector<State *> getChildren() { return children; };
-    void addChild(State &childState, double dist)
-    {
-        children.emplace_back(&childState);
-        childState.parent = &(*this);
-        childState.graphIndex = childState.parent->graphIndex + 1;
-        childState.edgeCost = childState.parent->edgeCost + dist;
-    };
+    void addChild(State &childState, double dist);
+    void deleteChild(State *childS){}
+
     State *getParent() { return parent; };
+    void setParent(State *pS){parent = pS;};
 
     double getEdgeCost(){return edgeCost;};
     void setEdgeCost(double dist){this->edgeCost += dist;};

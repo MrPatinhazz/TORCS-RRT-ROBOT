@@ -37,16 +37,18 @@ static void shutdown(int index);
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 void treeExpand();
 int findMinIndex(v3d pos, vector<State *> list);
+void treeRewire(v3d newPos);
 
-static RRT *myrrt = nullptr;	//RRT class - holds the state pool and functions
-DWindow *dwind = nullptr;	//Debug window class and functions
-tTrack *myTrack = nullptr;	//Track holder
-v3d *strpos = {};	//Pos written on dwindow
-v3d randpos = {};	//Rand position
-bool windowCreated, treeInit, pathAdjusted;	//Does debug window exist? // Has the tree started? // Has the path been adjusted
-int frame = 0;	//Current frame
-int startIndex = 600; int goalIndex = 500;
-//int _inNbr = 0, minEdgeDif = 99999, minEdIndex = -1; //Neighboor states (defined by NBR_RADIUS), minimum edge cost found , index of that state
+static RRT *myrrt = nullptr;						 //RRT class - holds the state pool and functions
+DWindow *dwind = nullptr;							 //Debug window class and functions
+tTrack *myTrack = nullptr;							 //Track holder
+v3d *strpos = {};									 //Pos written on dwindow
+v3d randpos = {};									 //Rand position
+bool windowCreated, treeInit, pathAdjusted, stAdded; //Does debug window exist? // Has the tree started? // Has the path been adjusted
+int frame = 0;										 //Current frame
+int startIndex = 1000;
+int goalIndex = 1400;
+
 //******************************************************************************************/
 
 static const char *botname[BOTS] = {
@@ -168,6 +170,12 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 
 	//* G.Init - Temp location.
 	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());
+	/*
+	double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
+	v3d pos = {_x, _y, _z};
+	State *initState = new State(pos);
+	*/
+
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
 	treeInit = true; //* INITS THE RRT
@@ -177,6 +185,8 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 		//* Expand the tree TREESIZE nodes
 		do
 		{
+			if (myrrt->getPool().size() % 1000 == 0)
+				cout << myrrt->getPool().size() << endl;
 			treeExpand();
 		} while (myrrt->getPool().size() < TREESIZE);
 	}
@@ -239,12 +249,11 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 
 	//* If growth is iterative && tree size not reached, expand
-	/*
+
 	if (ITERGROWTH && myrrt->getPool().size() < TREESIZE)
 	{
 		treeExpand();
 	}
-	*/
 
 	/* decide how we want to drive */
 	if (car->_dammage < myc->undamaged / 3 && myc->bmode != myc->NORMAL)
@@ -284,15 +293,14 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 
 	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
-	if(frame % 100 == 0) cout << frame << endl;
 	if (MAKEPATH && !pathAdjusted)
-	{ 
+	{
 		// TODO ; MAKE THE GOAL AND START DYNAMIC
 		//* Finds the closest node to the selected track segment and adds it to path, making it a goal
 		v3d goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();
 		int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
 		myrrt->addToPathV(*myrrt->getAt(minIndex));
-		
+
 		//* Copies every state from the goal to the source to the pathVec
 		myrrt->backtrack();
 
@@ -303,7 +311,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		}
 		pathAdjusted = true;
 	}
-	
+
 	/*
 	for(int nc = 0; nc < situation->_ncars -1; nc++)
 	{
@@ -640,18 +648,62 @@ void treeExpand()
 {
 	if ((ITERGROWTH && frame % EXPFREQ == 0) || !ITERGROWTH)
 	{
-		// do it STF times each frame || do it ktimes
-		for (int j = STF; j--;)
+		do
 		{
+			stAdded = false;
 			randpos = RandomGen::CTAPos(myTrack, myTrackDesc);
 
 			int minIndex = Util::findMinIndex(randpos, myrrt->getPool());
 			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
+			
 			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
 			{
 				myrrt->addState(myrrt->getAt(minIndex), &step, STEPSIZE);
+				stAdded = true;
+
+				if (myrrt->getAt(minIndex)->getParent() != nullptr)
+				{
+					v3d *Apos = myrrt->getAt(minIndex)->getPos();
+					v3d *Bpos = &step;
+					v3d *Cpos = myrrt->getAt(minIndex)->getParent()->getPos();
+					double bAngle = Trig::branchAngle(Apos,Bpos,Cpos);
+					cout << bAngle << endl;
+				}
+
+				//treeRewire(step);
+			}
+		} while (!stAdded);
+	}
+}
+
+void treeRewire(v3d newPos)
+{
+	double nbrMinCost = DBL_MAX;
+	size_t nbrIndex = -1;
+	State *currentState = myrrt->getPool().back();
+
+	for (size_t k = myrrt->getPool().size(); k--;)
+	{
+		double dist = Dist::eucl(newPos, *myrrt->getAt(k)->getPos());
+		if (dist <= NBR_RADIUS && dist > 0.1)
+		{
+			double edgeCost = myrrt->getAt(k)->getEdgeCost();
+			if (edgeCost < nbrMinCost)
+			{
+				nbrMinCost = edgeCost;
+				nbrIndex = k;
 			}
 		}
 	}
+
+	currentState->setParent(myrrt->getAt(nbrIndex));
+	vector<State *> children = currentState->getParent()->getChildren();
+	if (!children.empty())
+	{
+		cout << "CURR STATE" << currentState << endl;
+		currentState->getParent()->printChildren();
+		children.push_back(currentState);
+	}
+	cout << endl;
 }

@@ -11,13 +11,12 @@ using namespace std;
 //RRT Parameters
 #define DRAWWIN 1	  // Draws window
 #define MAKEPATH 0	 // Makes path
-#define SEGMARGIN 1	 // Security margin (measured from mid segment)
-#define STEPSIZE 2 // Branch (step) size - Recommended < 0.5
-#define TREESIZE 15000 // Tree Size - Recomended > 16k
-#define ITERGROWTH 0   // If tree grows iteratively (1) or completly offline (0)
-#define STF 50		   // States per frame (if ITERGROWTH)
-#define EXPFREQ 50	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
-#define NBR_RADIUS 5   // Neighboorhood (close states) radius
+#define SEGMARGIN 4.5  // Security margin (measured from mid segment)
+#define STEPSIZE 20   // Branch (step) size - Recommended < 0.5
+#define TREESIZE 35000 // Tree Size - Recomended > 16k
+#define ITERGROWTH 1  // If tree grows iteratively (1) or completly offline (0)
+#define EXPFREQ 100	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
+#define NBR_RADIUS 2   // Neighboorhood (close states) radius
 
 //Random number/state generators
 class RandomGen
@@ -55,6 +54,16 @@ public:
 	static double angleBetween(v3d *a, v3d *b)
 	{
 		return atan2(b->x - a->x, b->y - a->y) * 180 / PI;
+	};
+
+	// a is xNear, b is xNew, c is parent of a
+	static double branchAngle(v3d *a, v3d *b, v3d *c)
+	{
+		double AB = Dist::eucl(*a, *b);
+		double AC = Dist::eucl(*a, *c);
+		double BC = Dist::eucl(*b, *c);
+
+		return RAD2DEG(acos(((AB*AB) + (AC*AC) - (BC*BC)) / (2 * AB * AC)));
 	};
 };
 

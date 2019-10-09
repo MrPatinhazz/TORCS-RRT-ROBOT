@@ -12,11 +12,12 @@ using namespace std;
 #define DRAWWIN 1	  // Draws window
 #define MAKEPATH 0	 // Makes path
 #define SEGMARGIN 4.5  // Security margin (measured from mid segment)
-#define STEPSIZE 20   // Branch (step) size - Recommended < 0.5
-#define TREESIZE 35000 // Tree Size - Recomended > 16k
-#define ITERGROWTH 1  // If tree grows iteratively (1) or completly offline (0)
-#define EXPFREQ 100	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
+#define STEPSIZE 2   // Branch (step) size - Recommended < 0.5
+#define TREESIZE 10000 // Tree Size - Recomended > 16k
+#define ITERGROWTH 0  // If tree grows iteratively (1) or completly offline (0)
+#define EXPFREQ 1	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
 #define NBR_RADIUS 2   // Neighboorhood (close states) radius
+#define ANGLELIMIT 160 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
 
 //Random number/state generators
 class RandomGen
@@ -81,11 +82,11 @@ public:
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar *ocar)
 	{
 		//Ignores validation
-		return true;
-		//int closestid = myTrackDesc->getNearestId(pos);
-		//double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+		//return true;
+		int closestid = myTrackDesc->getNearestId(pos);
+		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
-		//return (distToPos < SEGMARGIN);
+		return (distToPos < SEGMARGIN);
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

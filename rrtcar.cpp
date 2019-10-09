@@ -46,7 +46,7 @@ v3d *strpos = {};									 //Pos written on dwindow
 v3d randpos = {};									 //Rand position
 bool windowCreated, treeInit, pathAdjusted, stAdded; //Does debug window exist? // Has the tree started? // Has the path been adjusted
 int frame = 0;										 //Current frame
-int startIndex = 1000;
+int startIndex = 0;
 int goalIndex = 1400;
 
 //******************************************************************************************/
@@ -185,8 +185,7 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 		//* Expand the tree TREESIZE nodes
 		do
 		{
-			if (myrrt->getPool().size() % 1000 == 0)
-				cout << myrrt->getPool().size() << endl;
+			cout << myrrt->getPool().size() << endl;
 			treeExpand();
 		} while (myrrt->getPool().size() < TREESIZE);
 	}
@@ -646,6 +645,9 @@ void updateTextWindow(tSituation *situation, MyCar *myc, Pathfinder *mpf)
 /*Expands the tree k times*/
 void treeExpand()
 {
+	double bAngle = 0;
+	bool posValid = false;
+
 	if ((ITERGROWTH && frame % EXPFREQ == 0) || !ITERGROWTH)
 	{
 		do
@@ -656,27 +658,41 @@ void treeExpand()
 			int minIndex = Util::findMinIndex(randpos, myrrt->getPool());
 			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
-			
-			if (Util::isPosValid(myTrack, myTrackDesc, &step, ocar))
+			//Validates position
+			posValid = Util::isPosValid(myTrack, myTrackDesc, &step, ocar);
+
+			if (!posValid)
 			{
+				continue;
+			}
+
+			bool hasParent = myrrt->getAt(minIndex)->getParent() != nullptr;
+			if (hasParent)
+			{
+				//Validates angle
+				v3d *Apos = myrrt->getAt(minIndex)->getPos();
+				v3d *Bpos = &step;
+				v3d *Cpos = myrrt->getAt(minIndex)->getParent()->getPos();
+				bAngle = Trig::branchAngle(Apos, Bpos, Cpos);
+
+				if (bAngle <= 150)
+				{
+					continue;
+				}
+			}
+
+			if (posValid)
+			{
+				//cout << "HP?:" << hasParent << " bAngle:" << bAngle << endl;
 				myrrt->addState(myrrt->getAt(minIndex), &step, STEPSIZE);
 				stAdded = true;
-
-				if (myrrt->getAt(minIndex)->getParent() != nullptr)
-				{
-					v3d *Apos = myrrt->getAt(minIndex)->getPos();
-					v3d *Bpos = &step;
-					v3d *Cpos = myrrt->getAt(minIndex)->getParent()->getPos();
-					double bAngle = Trig::branchAngle(Apos,Bpos,Cpos);
-					cout << bAngle << endl;
-				}
-
 				//treeRewire(step);
 			}
 		} while (!stAdded);
 	}
 }
 
+/*
 void treeRewire(v3d newPos)
 {
 	double nbrMinCost = DBL_MAX;
@@ -707,3 +723,4 @@ void treeRewire(v3d newPos)
 	}
 	cout << endl;
 }
+*/

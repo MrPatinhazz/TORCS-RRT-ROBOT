@@ -10,14 +10,14 @@ using namespace std;
 
 //RRT Parameters
 #define DRAWWIN 1	  // Draws window
-#define MAKEPATH 0	 // Makes path
+#define MAKEPATH 1	 // Makes path
 #define SEGMARGIN 4.5  // Security margin (measured from mid segment)
-#define STEPSIZE 2   // Branch (step) size - Recommended < 0.5
-#define TREESIZE 10000 // Tree Size - Recomended > 16k
+#define STEPSIZE 3  // Branch (step) size - Recommended < 0.50
+#define TREESIZE 30000 // Tree Size - Recomended > 16k
 #define ITERGROWTH 0  // If tree grows iteratively (1) or completly offline (0)
 #define EXPFREQ 1	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
 #define NBR_RADIUS 2   // Neighboorhood (close states) radius
-#define ANGLELIMIT 160 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
+#define ANGLELIMIT 150 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
 
 //Random number/state generators
 class RandomGen

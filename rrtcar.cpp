@@ -47,7 +47,7 @@ v3d randpos = {};									 //Rand position
 bool windowCreated, treeInit, pathAdjusted, stAdded; //Does debug window exist? // Has the tree started? // Has the path been adjusted
 int frame = 0;										 //Current frame
 int startIndex = 0;
-int goalIndex = 1400;
+int goalIndex = 500;
 
 //******************************************************************************************/
 
@@ -169,7 +169,7 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	myTrack = myTrackDesc->getTorcsTrack();
 
 	//* G.Init - Temp location.
-	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());
+	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());	
 	/*
 	double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
 	v3d pos = {_x, _y, _z};
@@ -675,7 +675,7 @@ void treeExpand()
 				v3d *Cpos = myrrt->getAt(minIndex)->getParent()->getPos();
 				bAngle = Trig::branchAngle(Apos, Bpos, Cpos);
 
-				if (bAngle <= 150)
+				if (bAngle <= ANGLELIMIT)
 				{
 					continue;
 				}

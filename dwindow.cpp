@@ -6,8 +6,8 @@
 #define DRAWPLAN 0	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
 #define DRAWPOS 0	  // Car(s) position
-#define DRAWPATH 0	 // RRT init-goal path
-#define DRAWRRT 1	  // RRT full tree
+#define DRAWPATH 1	 // RRT init-goal path
+#define DRAWRRT 0	  // RRT full tree
 
 //DRAW PARAMS
 #define MAPSEGWIDTH 1

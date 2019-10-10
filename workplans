@@ -1,22 +1,3 @@
-
-	_inNbr = 0;
-
-	/* RRT* - Still in consideration. Dont know if its worth it or not.
-	for (size_t n = 0; n < myrrt->getPool().size() - 1; n++)
-	{
-		int edgeDif = Dist::eucl(step, *myrrt->getAt(n)->getPos());
-		if (edgeDif <= NBR_RADIUS)
-			{
-				_inNbr++;
-				cout << myrrt->getAt(n)->getEdgeCost() << "  ";
-			}
-	}
-		cout << endl << _inNbr << endl;
-		cout << "________" << endl;
-		*/
-
-//////////////////////////////////////////////////
-
 INICIO E GOAL DINAMICOS:
 	1) Desenhar um segmento a x segmentos do carro. A frente e atras e igual [FEITO]
 	2) Guardar essa posicao/pointer do segmento. vou precisar pa fazer backtrack
@@ -31,3 +12,38 @@ O OptLoc e calculado logo de inicio e e estatico, nao muda. O Loc e dinamico , c
 esta a LOOKAHEAD distancia desse. 
 
 O carro segue o Loc com alguma margem. Caso a margem de erro nao o permita. 
+
+/////////////////////////////////////
+
+/*
+void treeRewire(v3d newPos)
+{
+	double nbrMinCost = DBL_MAX;
+	size_t nbrIndex = -1;
+	State *currentState = myrrt->getPool().back();
+
+	for (size_t k = myrrt->getPool().size(); k--;)
+	{
+		double dist = Dist::eucl(newPos, *myrrt->getAt(k)->getPos());
+		if (dist <= NBR_RADIUS && dist > 0.1)
+		{
+			double edgeCost = myrrt->getAt(k)->getEdgeCost();
+			if (edgeCost < nbrMinCost)
+			{
+				nbrMinCost = edgeCost;
+				nbrIndex = k;
+			}
+		}
+	}
+
+	currentState->setParent(myrrt->getAt(nbrIndex));
+	vector<State *> children = currentState->getParent()->getChildren();
+	if (!children.empty())
+	{
+		cout << "CURR STATE" << currentState << endl;
+		currentState->getParent()->printChildren();
+		children.push_back(currentState);
+	}
+	cout << endl;
+}
+*/

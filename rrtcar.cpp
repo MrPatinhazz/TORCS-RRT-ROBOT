@@ -44,10 +44,10 @@ DWindow *dwind = nullptr;							 //Debug window class and functions
 tTrack *myTrack = nullptr;							 //Track holder
 v3d *strpos = {};									 //Pos written on dwindow
 v3d randpos = {};									 //Rand position
-bool windowCreated, treeInit, pathAdjusted, stAdded; //Does debug window exist? // Has the tree started? // Has the path been adjusted
+bool windowCreated, treeInit, adjustPath, stAdded; //Does debug window exist? // Has the tree started? // Has the path been adjusted
 int frame = 0;										 //Current frame
-int startIndex = 0;
-int goalIndex = 500;
+int startIndex = 850;
+int goalIndex = 1000;
 
 //******************************************************************************************/
 
@@ -175,7 +175,7 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	v3d pos = {_x, _y, _z};
 	State *initState = new State(pos);
 	*/
-
+	//TODO:: ADD 2 STATES TO LIMIT ANGLE
 	myrrt->addToPool(*initState);
 	myrrt->getRoot()->setGraphIndex(0);
 	treeInit = true; //* INITS THE RRT
@@ -292,7 +292,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 
 	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
-	if (MAKEPATH && !pathAdjusted)
+	if (MAKEPATH && adjustPath)
 	{
 		// TODO ; MAKE THE GOAL AND START DYNAMIC
 		//* Finds the closest node to the selected track segment and adds it to path, making it a goal
@@ -306,9 +306,10 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		for (int n = startIndex; n < goalIndex; n++)
 		{
 			int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getLoc(), myrrt->getPathV());
+			mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
 			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(minIndex)->getPos());
 		}
-		pathAdjusted = true;
+		adjustPath = false;
 	}
 
 	/*
@@ -691,36 +692,3 @@ void treeExpand()
 		} while (!stAdded);
 	}
 }
-
-/*
-void treeRewire(v3d newPos)
-{
-	double nbrMinCost = DBL_MAX;
-	size_t nbrIndex = -1;
-	State *currentState = myrrt->getPool().back();
-
-	for (size_t k = myrrt->getPool().size(); k--;)
-	{
-		double dist = Dist::eucl(newPos, *myrrt->getAt(k)->getPos());
-		if (dist <= NBR_RADIUS && dist > 0.1)
-		{
-			double edgeCost = myrrt->getAt(k)->getEdgeCost();
-			if (edgeCost < nbrMinCost)
-			{
-				nbrMinCost = edgeCost;
-				nbrIndex = k;
-			}
-		}
-	}
-
-	currentState->setParent(myrrt->getAt(nbrIndex));
-	vector<State *> children = currentState->getParent()->getChildren();
-	if (!children.empty())
-	{
-		cout << "CURR STATE" << currentState << endl;
-		currentState->getParent()->printChildren();
-		children.push_back(currentState);
-	}
-	cout << endl;
-}
-*/

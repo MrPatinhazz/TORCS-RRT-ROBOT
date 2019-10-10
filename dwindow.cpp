@@ -3,9 +3,9 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPLAN 0	 // K1999 plan
+#define DRAWPLAN 1	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
-#define DRAWPOS 0	  // Car(s) position
+#define DRAWPOS 1	  // Car(s) position
 #define DRAWPATH 1	 // RRT init-goal path
 #define DRAWRRT 0	  // RRT full tree
 
@@ -13,8 +13,8 @@
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 0.7
-#define SCALE 1.5
-#define STEPSKIP 8
+#define SCALE 2
+#define STEPSKIP 5
 #define LOOKBACKDIST 40
 #define LOOKAHEADDIST 40
 
@@ -256,7 +256,7 @@ void drawPath()
 		for (size_t j = dwPath.size(); j--;)
 		{
 			glColor3f(BLUE);
-			drawCircleP(dwPath[j]->getPos(), 0.5);
+			drawCircleP(dwPath[j]->getPos(), 0.8);
 		}
 		glColor3f(YELLOW);
 		drawCircleP(dwPath[dwPath.size() - 1]->getPos(), 1);

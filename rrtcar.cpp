@@ -37,17 +37,18 @@ static void shutdown(int index);
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 void treeExpand();
 int findMinIndex(v3d pos, vector<State *> list);
-void treeRewire(v3d newPos);
+//void treeRewire(v3d newPos);
 
-static RRT *myrrt = nullptr;						 //RRT class - holds the state pool and functions
-DWindow *dwind = nullptr;							 //Debug window class and functions
-tTrack *myTrack = nullptr;							 //Track holder
-v3d *strpos = {};									 //Pos written on dwindow
-v3d randpos = {};									 //Rand position
-bool windowCreated, treeInit, adjustPath, stAdded; //Does debug window exist? // Has the tree started? // Has the path been adjusted
-int frame = 0;										 //Current frame
-int startIndex = 850;
-int goalIndex = 1000;
+static RRT *myrrt = nullptr;									 //RRT class - holds the state pool and functions
+DWindow *dwind = nullptr;										 //Debug window class and functions
+tTrack *myTrack = nullptr;										 //Track holder
+v3d *strpos = {};												 //Pos written on dwindow
+v3d randpos = {};												 //Rand position
+bool windowCreated, treeInit, adjustPath, stAdded, goalReached; //Does debug window exist? // Has the tree started? // Has the path been adjusted
+int frame = 0;													 //Current frame
+int startIndex = 0;
+int goalIndex = 500;
+v3d goalSeg;
 
 //******************************************************************************************/
 
@@ -169,7 +170,8 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	myTrack = myTrackDesc->getTorcsTrack();
 
 	//* G.Init - Temp location.
-	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());	
+	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());
+	goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();
 	/*
 	double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
 	v3d pos = {_x, _y, _z};
@@ -249,9 +251,15 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	//* If growth is iterative && tree size not reached, expand
 
-	if (ITERGROWTH && myrrt->getPool().size() < TREESIZE)
+	if (ITERGROWTH && !goalReached)
 	{
 		treeExpand();
+		double toGoalDist = Dist::eucl(*myrrt->getPool().back()->getPos(), goalSeg);
+		if (toGoalDist < 5)
+		{
+			goalReached = true;
+			adjustPath = true;
+		}
 	}
 
 	/* decide how we want to drive */
@@ -292,11 +300,10 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 
 	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
-	if (MAKEPATH && adjustPath)
+	if (MAKEPATH && adjustPath && goalReached)
 	{
 		// TODO ; MAKE THE GOAL AND START DYNAMIC
 		//* Finds the closest node to the selected track segment and adds it to path, making it a goal
-		v3d goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();
 		int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
 		myrrt->addToPathV(*myrrt->getAt(minIndex));
 

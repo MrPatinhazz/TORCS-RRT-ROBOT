@@ -3,19 +3,15 @@
 State::State()
 {
   pos = v3d(0, 0, 0);
-  graphIndex = 0;
   parent = nullptr;
   children = {};
-  edgeCost = 0;
 }
 
 State::State(v3d npos)
 {
   pos = npos;
-  graphIndex = 0;
   parent = nullptr;
   children = {};
-  edgeCost = 0;
 }
 
 State::~State()
@@ -41,6 +37,4 @@ void State::addChild(State &childState, double dist)
 {
   children.emplace_back(&childState);
   childState.parent = &(*this);
-  childState.graphIndex = childState.parent->graphIndex + 1;
-  childState.edgeCost = childState.parent->edgeCost + dist;
 }

@@ -3,9 +3,9 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPLAN 0	 // K1999 plan
+#define DRAWPLAN 1	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
-#define DRAWPOS 0	  // Car(s) position
+#define DRAWPOS 1	  // Car(s) position
 #define DRAWPATH 1	 // RRT init-goal path
 #define DRAWRRT 1	  // RRT full tree
 
@@ -13,8 +13,8 @@
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 0.7
-#define SCALE 2
-#define STEPSKIP 5
+#define SCALE 1.2
+#define STEPSKIP 8
 #define LOOKBACKDIST 40
 #define LOOKAHEADDIST 40
 
@@ -58,7 +58,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	{
 		glutInitWindowSize(300, 300);
 		statsInt = glutCreateWindow("Stats");
-		glutPositionWindow(720, 0);
+		glutPositionWindow(250, 0);
 		glutDisplayFunc(drawStatsWindow);
 	}
 
@@ -66,7 +66,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	{
 		glutInitWindowSize(w * SCALE, h * SCALE);
 		pathInt = glutCreateWindow("Drawing path");
-		glutPositionWindow(720, 0);
+		glutPositionWindow(420, 0);
 		glutDisplayFunc(drawPathWindow);
 	}
 }

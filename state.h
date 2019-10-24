@@ -24,9 +24,6 @@ public:
     v3d *getPos() { return &pos; };
     void setPos(v3d pos);
 
-    int getGraphIndex() { return graphIndex; };
-    void setGraphIndex(int index) { graphIndex = index; };
-
     vector<State *> getChildren() { return children; };
     void addChild(State &childState, double dist);
     void deleteChild(State *childS){}
@@ -34,16 +31,11 @@ public:
     State *getParent() { return parent; };
     void setParent(State *pS){parent = pS;};
 
-    double getEdgeCost(){return edgeCost;};
-    void setEdgeCost(double dist){this->edgeCost += dist;};
-
     void printChildren();
     void toString();
 
 private:
     v3d pos;
-    int graphIndex;
     State *parent;
     vector<State *> children;
-    double edgeCost;
 };

@@ -14,36 +14,3 @@ esta a LOOKAHEAD distancia desse.
 O carro segue o Loc com alguma margem. Caso a margem de erro nao o permita. 
 
 /////////////////////////////////////
-
-/*
-void treeRewire(v3d newPos)
-{
-	double nbrMinCost = DBL_MAX;
-	size_t nbrIndex = -1;
-	State *currentState = myrrt->getPool().back();
-
-	for (size_t k = myrrt->getPool().size(); k--;)
-	{
-		double dist = Dist::eucl(newPos, *myrrt->getAt(k)->getPos());
-		if (dist <= NBR_RADIUS && dist > 0.1)
-		{
-			double edgeCost = myrrt->getAt(k)->getEdgeCost();
-			if (edgeCost < nbrMinCost)
-			{
-				nbrMinCost = edgeCost;
-				nbrIndex = k;
-			}
-		}
-	}
-
-	currentState->setParent(myrrt->getAt(nbrIndex));
-	vector<State *> children = currentState->getParent()->getChildren();
-	if (!children.empty())
-	{
-		cout << "CURR STATE" << currentState << endl;
-		currentState->getParent()->printChildren();
-		children.push_back(currentState);
-	}
-	cout << endl;
-}
-*/

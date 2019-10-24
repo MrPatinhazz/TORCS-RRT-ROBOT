@@ -42,13 +42,11 @@ int findMinIndex(v3d pos, vector<State *> list);
 static RRT *myrrt = nullptr;									 //RRT class - holds the state pool and functions
 DWindow *dwind = nullptr;										 //Debug window class and functions
 tTrack *myTrack = nullptr;										 //Track holder
-v3d *strpos = {};												 //Pos written on dwindow
-v3d randpos = {};												 //Rand position
+v3d *strpos = {};												 //Pos written on dwindow											 
 bool windowCreated, treeInit, adjustPath, stAdded, goalReached; //Does debug window exist? // Has the tree started? // Has the path been adjusted
-int frame = 0;													 //Current frame
-int startIndex = 0;
-int goalIndex = 500;
-v3d goalSeg;
+int startIndex, goalIndex, overtakeId = 0, frame = 0;
+v3d randpos,goalTseg,startSeg;
+double stGlDist = 0;
 
 //******************************************************************************************/
 
@@ -169,28 +167,31 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//* Saves the pointer to Torcs Track and its width
 	myTrack = myTrackDesc->getTorcsTrack();
 
-	//* G.Init - Temp location.
-	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());
-	goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();
 	/*
-	double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
-	v3d pos = {_x, _y, _z};
-	State *initState = new State(pos);
-	*/
-	//TODO:: ADD 2 STATES TO LIMIT ANGLE
-	myrrt->addToPool(*initState);
-	myrrt->getRoot()->setGraphIndex(0);
-	treeInit = true; //* INITS THE RRT
+		//* G.Init - Temp location.
+		//State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());
+		//goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();	
+	
+		//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
+		//v3d pos = {_x, _y, _z};
+		//State *initState = new State(pos);
+	
+		//TODO:: ADD 2 STATES TO LIMIT ANGLE
+		//myrrt->addToPool(*initState);
+		//myrrt->getRoot()->setGraphIndex(0);
+		//treeInit = true; //* INITS THE RRT
 
-	if (!ITERGROWTH && treeInit)
-	{
-		//* Expand the tree TREESIZE nodes
-		do
+
+		if (!ITERGROWTH && treeInit)
 		{
-			cout << myrrt->getPool().size() << endl;
-			treeExpand();
-		} while (myrrt->getPool().size() < TREESIZE);
-	}
+			//* Expand the tree TREESIZE nodes
+			do
+			{
+				cout << myrrt->getPool().size() << endl;
+				treeExpand();
+			} while (myrrt->getPool().size() < TREESIZE);
+		}
+	*/
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -241,21 +242,31 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
+	
+	//TODO:: CREATING A DYNAMIC START
+	overtakeId = ocar[1].getCurrentSegId();
 
-	//* Updates debug window string information
-	if (windowCreated)
+	if(mpf->gettOCar()[0].overtakee == 0 && !treeInit)
 	{
-		//updateTextWindow(situation, myc, mpf);
-		dwind->Redisplay();
+		startIndex = overtakeId-50;
+		startSeg = *mpf->getPathSeg(startIndex)->getOptLoc();
+		State *initState = new State(startSeg);
+
+		goalIndex = overtakeId+50;
+		goalTseg = *mpf->getPathSeg(goalIndex)->getOptLoc();
+		stGlDist = Dist::eucl(startSeg,goalTseg);
+
+		myrrt->addToPool(*initState);
+		treeInit = true;
 	}
+	//TODO:: CREATING A DYNAMIC START
 
 	//* If growth is iterative && tree size not reached, expand
-
-	if (ITERGROWTH && !goalReached)
+	if (treeInit && ITERGROWTH && !goalReached)
 	{
 		treeExpand();
-		double toGoalDist = Dist::eucl(*myrrt->getPool().back()->getPos(), goalSeg);
-		if (toGoalDist < 5)
+		double toGoalDist = Dist::eucl(*myrrt->getPool().back()->getPos(), goalTseg);
+		if (toGoalDist < 10)
 		{
 			goalReached = true;
 			adjustPath = true;
@@ -296,15 +307,10 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		myc->loadBehaviour(myc->NORMAL);
 	}
 
-	/* compute path according to the situation */
-	mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
-
-	//* CHANGES HERE - 200 AND 600 ARE TEMP. I NEED TO MAKE THESE VALUES DYNAMIC*/
 	if (MAKEPATH && adjustPath && goalReached)
 	{
-		// TODO ; MAKE THE GOAL AND START DYNAMIC
 		//* Finds the closest node to the selected track segment and adds it to path, making it a goal
-		int minIndex = Util::findMinIndex(goalSeg, myrrt->getPool());
+		int minIndex = Util::findMinIndex(goalTseg, myrrt->getPool());
 		myrrt->addToPathV(*myrrt->getAt(minIndex));
 
 		//* Copies every state from the goal to the source to the pathVec
@@ -318,15 +324,12 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		}
 		adjustPath = false;
 	}
-
-	/*
-	for(int nc = 0; nc < situation->_ncars -1; nc++)
+	else
 	{
-		cout << mpf->gettOCar()[nc].dist << " ";
+		/* compute path according to the situation */
+		mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 	}
-	cout << endl;
-	*/
-	//* CHANGES HERE */
+	//*CHANGES HERE
 
 	/* clear ctrl structure with zeros and set the current gear */
 	std::memset(&car->ctrl, 0, sizeof(tCarCtrl));
@@ -617,6 +620,14 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 
 	if (myc->tr_mode == 0)
 		car->_steerCmd = steer;
+
+	//* Updates debug window string information
+	if (windowCreated)
+	{
+		//updateTextWindow(situation, myc, mpf);
+		dwind->Redisplay();
+	}
+
 }
 
 /* pitstop callback */
@@ -653,7 +664,6 @@ void updateTextWindow(tSituation *situation, MyCar *myc, Pathfinder *mpf)
 /*Expands the tree k times*/
 void treeExpand()
 {
-	double bAngle = 0;
 	bool posValid = false;
 
 	if ((ITERGROWTH && frame % EXPFREQ == 0) || !ITERGROWTH)
@@ -666,35 +676,25 @@ void treeExpand()
 			int minIndex = Util::findMinIndex(randpos, myrrt->getPool());
 			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
-			//Validates position
-			posValid = Util::isPosValid(myTrack, myTrackDesc, &step, ocar);
+			//cout << startSeg.x << "--" << goalTseg.x << "--" << step.x << endl;
 
-			if (!posValid)
-			{
-				continue;
-			}
-
-			bool hasParent = myrrt->getAt(minIndex)->getParent() != nullptr;
-			if (hasParent)
+			posValid = (Util::isPosValid(myTrack, myTrackDesc, &step, ocar[1], startSeg, goalTseg));
+			if (!posValid){continue;}
+	
+			if (myrrt->getAt(minIndex)->getParent() != nullptr)
 			{
 				//Validates angle
-				v3d *Apos = myrrt->getAt(minIndex)->getPos();
-				v3d *Bpos = &step;
-				v3d *Cpos = myrrt->getAt(minIndex)->getParent()->getPos();
-				bAngle = Trig::branchAngle(Apos, Bpos, Cpos);
+				v3d *A = myrrt->getAt(minIndex)->getPos();
+				v3d *B = &step;
+				v3d *C = myrrt->getAt(minIndex)->getParent()->getPos();
 
-				if (bAngle <= ANGLELIMIT)
-				{
-					continue;
-				}
+				if (Trig::branchAngle(A,B,C) <= ANGLELIMIT){continue;}
 			}
 
 			if (posValid)
 			{
-				//cout << "HP?:" << hasParent << " bAngle:" << bAngle << endl;
 				myrrt->addState(myrrt->getAt(minIndex), &step, STEPSIZE);
 				stAdded = true;
-				//treeRewire(step);
 			}
 		} while (!stAdded);
 	}

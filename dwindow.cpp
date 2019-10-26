@@ -3,25 +3,25 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPLAN 1	 // K1999 plan
+#define DRAWPLAN 0	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
-#define DRAWPOS 1	  // Car(s) position
-#define DRAWPATH 1	 // RRT init-goal path
+#define DRAWPOS 0	  // Car(s) position
+#define DRAWPATH 0	 // RRT init-goal path
 #define DRAWRRT 1	  // RRT full tree
 
 //DRAW PARAMS
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 5
 #define LINEWIDTH 0.7
-#define SCALE 1.2
-#define STEPSKIP 8
+#define SCALE 2
+#define STEPSKIP 2
 #define LOOKBACKDIST 40
 #define LOOKAHEADDIST 40
 
 //GLCOLORS
 #define WHITE 1, 1, 1
 #define BLACK 0, 0, 0
-#define LGTGREY 0.839, 0.839, 0.839
+#define LGTGREY 0.9, 0.9, 0.9
 #define RED 1, 0, 0
 #define ORANGE 1, 0.631, 0.058
 #define PURPLE 1, 0.160, 0.956
@@ -220,22 +220,13 @@ void drawRRT()
 	{
 		for (size_t j = dwPool.size(); j--;)
 		{
-			//Draws nbr radius on the last state added
-			/*
-			if (j == dwPool.size() - 1)
-			{
-				glColor4f(RED,0.4);
-				drawCircleP(dwPool[j]->getPos(), NBR_RADIUS);
-			}
-			*/
-
 			/*
 			glColor3f(BLUE);
 			drawCircleP(dwPool[j]->getPos(), 2);
 			*/
 
 			//Draws trees connections (edges)
-			glColor3f(ORANGE);
+			glColor3f(BLACK);
 			vector<State *> sChildren = dwPool[j]->getChildren();
 			if (!sChildren.empty())
 			{
@@ -379,5 +370,3 @@ void drawLine(State *initialS, State *finalS)
 	glVertex2f(finalPointx * SCALE, h - (finalPointy * SCALE));
 	glEnd();
 }
-
-//TODO: RENDER TO TEXTURE MAP SEGMENTSS

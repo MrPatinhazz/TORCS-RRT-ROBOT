@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/src/torcs/torcs-1.3.7/export/include",
-                "/usr/src/torcs/torcs-1.3.7/src/interfaces",
+                "/usr/src/torcs-1.3.7/export/include",
+                "/usr/src//torcs-1.3.7/src/interfaces",
                 "${workspaceFolder}"
             ],
             "defines": [],

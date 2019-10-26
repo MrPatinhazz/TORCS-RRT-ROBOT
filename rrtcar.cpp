@@ -44,7 +44,7 @@ DWindow *dwind = nullptr;										 //Debug window class and functions
 tTrack *myTrack = nullptr;										 //Track holder
 v3d *strpos = {};												 //Pos written on dwindow											 
 bool windowCreated, treeInit, adjustPath, stAdded, goalReached; //Does debug window exist? // Has the tree started? // Has the path been adjusted
-int startIndex, goalIndex, overtakeId = 0, frame = 0;
+int startIndex = 0, goalIndex, overtakeId = 0, frame = 0;
 v3d randpos,goalTseg,startSeg;
 double stGlDist = 0;
 
@@ -167,31 +167,28 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//* Saves the pointer to Torcs Track and its width
 	myTrack = myTrackDesc->getTorcsTrack();
 
+
+	//* G.Init - Temp location.
+	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());	
 	/*
-		//* G.Init - Temp location.
-		//State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());
-		//goalSeg = *myTrackDesc->getSegmentPtr(goalIndex)->getMiddle();	
-	
-		//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
-		//v3d pos = {_x, _y, _z};
-		//State *initState = new State(pos);
-	
-		//TODO:: ADD 2 STATES TO LIMIT ANGLE
-		//myrrt->addToPool(*initState);
-		//myrrt->getRoot()->setGraphIndex(0);
-		//treeInit = true; //* INITS THE RRT
-
-
-		if (!ITERGROWTH && treeInit)
-		{
-			//* Expand the tree TREESIZE nodes
-			do
-			{
-				cout << myrrt->getPool().size() << endl;
-				treeExpand();
-			} while (myrrt->getPool().size() < TREESIZE);
-		}
+	double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
+	v3d pos = {_x, _y, _z};
+	State *initState = new State(pos);
 	*/
+	
+	myrrt->addToPool(*initState);
+	treeInit = true;
+
+	if (!ITERGROWTH && treeInit)
+	{
+		//* Expand the tree TREESIZE nodes
+		do
+		{
+			cout << myrrt->getPool().size() << endl;
+			treeExpand();
+		} while (myrrt->getPool().size() < TREESIZE);
+	}
+
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -243,7 +240,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	/* update some values needed */
 	myc->update(myTrackDesc, car, situation);
 	
-	//TODO:: CREATING A DYNAMIC START
 	overtakeId = ocar[1].getCurrentSegId();
 
 	if(mpf->gettOCar()[0].overtakee == 0 && !treeInit)
@@ -259,7 +255,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		myrrt->addToPool(*initState);
 		treeInit = true;
 	}
-	//TODO:: CREATING A DYNAMIC START
 
 	//* If growth is iterative && tree size not reached, expand
 	if (treeInit && ITERGROWTH && !goalReached)
@@ -676,7 +671,6 @@ void treeExpand()
 			int minIndex = Util::findMinIndex(randpos, myrrt->getPool());
 			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
-			//cout << startSeg.x << "--" << goalTseg.x << "--" << step.x << endl;
 
 			posValid = (Util::isPosValid(myTrack, myTrackDesc, &step, ocar[1], startSeg, goalTseg));
 			if (!posValid){continue;}

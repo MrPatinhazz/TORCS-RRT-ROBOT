@@ -10,11 +10,11 @@ using namespace std;
 
 //RRT Parameters
 #define DRAWWIN 1	  // Draws window
-#define MAKEPATH 1	 // Makes path
+#define MAKEPATH 0	 // Makes path
 #define SEGMARGIN 4.5  // Security margin (measured from mid segment)
 #define STEPSIZE 5 // Branch (step) size - Recommended < 0.50
-#define TREESIZE 7000 // Tree Size - Recomended > 16k, was 25k for prints
-#define ITERGROWTH 1  // If tree grows iteratively (1) or completly offline (0)
+#define TREESIZE 5000 // Tree Size - Recomended > 16k, was 25k for prints
+#define ITERGROWTH 0  // If tree grows iteratively (1) or completly offline (0)
 #define EXPFREQ 1	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
 #define ANGLELIMIT 160 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
 
@@ -82,6 +82,7 @@ public:
 	{
 		//Ignores validation
 		//return true;
+		/*
 		bool xCheck = false;
 
 			if(goalP.x > startP.x) // Goal à direita
@@ -94,15 +95,13 @@ public:
 			}
 
 		double distTocar = Dist::eucl(*tocar.getCurrentPos(),*pos);
+		*/
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 
-		if(distTocar < 3)
-		{
-			cout << distTocar << endl;
-		}
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
-		return (distToPos < SEGMARGIN) && xCheck && (distTocar > 3);
+		return (distToPos < SEGMARGIN);// && xCheck && (distTocar > 3);
+	
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

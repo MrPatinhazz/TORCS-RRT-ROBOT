@@ -13,7 +13,7 @@ using namespace std;
 #define MAKEPATH 0	 // Makes path
 #define SEGMARGIN 4.5  // Security margin (measured from mid segment)
 #define STEPSIZE 5 // Branch (step) size - Recommended < 0.50
-#define TREESIZE 5000 // Tree Size - Recomended > 16k, was 25k for prints
+#define TREESIZE 1 // Tree Size - Recomended > 16k, was 25k for prints
 #define ITERGROWTH 0  // If tree grows iteratively (1) or completly offline (0)
 #define EXPFREQ 1	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
 #define ANGLELIMIT 160 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
@@ -81,7 +81,8 @@ public:
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar tocar, v3d startP, v3d goalP)
 	{
 		//Ignores validation
-		//return true;
+		return true;
+		
 		/*
 		bool xCheck = false;
 
@@ -95,12 +96,13 @@ public:
 			}
 
 		double distTocar = Dist::eucl(*tocar.getCurrentPos(),*pos);
-		*/
+
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
 		return (distToPos < SEGMARGIN);// && xCheck && (distTocar > 3);
+		*/
 	
 	};
 

@@ -169,12 +169,12 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 
 
 	//* G.Init - Temp location.
-	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());	
-	/*
+	//State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());	
+	
 	double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
 	v3d pos = {_x, _y, _z};
 	State *initState = new State(pos);
-	*/
+	
 	
 	myrrt->addToPool(*initState);
 	treeInit = true;

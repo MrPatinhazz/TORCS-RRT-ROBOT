@@ -3,30 +3,31 @@
 //DRAW TRIGGERS
 #define DRAWMAPWIN 1   // Map window
 #define DRAWSTATSWIN 0 // Stats window
-#define DRAWPLAN 0	 // K1999 plan
+#define DRAWPLAN 1	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
 #define DRAWPOS 0	  // Car(s) position
 #define DRAWPATH 0	 // RRT init-goal path
-#define DRAWRRT 1	  // RRT full tree
+#define DRAWRRT 0	  // RRT full tree
 
 //DRAW PARAMS
 #define MAPSEGWIDTH 1
-#define CIRCLEWIDTH 5
-#define LINEWIDTH 0.7
-#define SCALE 2
-#define STEPSKIP 2
+#define CIRCLEWIDTH 3
+#define LINEWIDTH 0.5
+#define SCALE 1.5
+#define STEPSKIP 1
 #define LOOKBACKDIST 40
 #define LOOKAHEADDIST 40
 
 //GLCOLORS
 #define WHITE 1, 1, 1
 #define BLACK 0, 0, 0
-#define LGTGREY 0.9, 0.9, 0.9
+#define DKGREY 0.5,0.5,0.5
+#define LGTGREY 0.92, 0.92, 0.92
 #define RED 1, 0, 0
-#define ORANGE 1, 0.631, 0.058
-#define PURPLE 1, 0.160, 0.956
+#define ORANGE 1, 0.6, 0.0
+#define PURPLE 1, 0.16, 0.95
 #define BLUE 0, 0, 1
-#define GREEN 0, 0.501, 0.062
+#define GREEN 0, 0.760, 0
 #define YELLOW 1, 1, 0
 
 //GLOBAL SUP VARS
@@ -157,7 +158,7 @@ void drawPathWindow()
 	//Draw map segments
 	if (DRAWMAP)
 	{
-		glColor3f(BLACK);
+		glColor3f(DKGREY);
 		drawMapSegments();
 	}
 
@@ -331,7 +332,7 @@ void drawCircleP(v3d *pos, GLfloat radius)
 	int y = h - (pos->y * SCALE);
 
 	int i;
-	int triangleAmount = 25;
+	int triangleAmount = 20;
 
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(CIRCLEWIDTH);

@@ -6,15 +6,15 @@
 #define DRAWPLAN 1	 // K1999 plan
 #define DRAWMAP 1	  // Map segments
 #define DRAWPOS 1	  // Car(s) position
-#define DRAWPATH 0	 // RRT init-goal path
+#define DRAWPATH 1	 // RRT init-goal path
 #define DRAWRRT 0	  // RRT full tree
 
 //DRAW PARAMS
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 3
 #define LINEWIDTH 0.5
-#define SCALE 2
-#define STEPSKIP 1
+#define SCALE 1.2
+#define STEPSKIP 8
 #define LOOKBACKDIST 40
 #define LOOKAHEADDIST 40
 
@@ -276,27 +276,6 @@ void drawPos()
 
 		glColor3f(BLUE);
 		drawCorners(dwOcar[j].getCarPtr());
-
-		/*
-		glColor3f(YELLOW);
-		int lookBackIndex = currSeg - LOOKBACKDIST;
-		if (lookBackIndex < 0)
-		{
-			// nSeg - (LBR - CurrSeg). ex 300 - (40-39) = 299
-			lookBackIndex = nTSeg - (LOOKBACKDIST - currSeg);
-		}
-		v3d *backpos = dwTrDesc->getSegmentPtr(lookBackIndex)->getMiddle();
-		drawCircleP(backpos, 2);
-
-		int lookAheadIndex = currSeg + LOOKAHEADDIST;
-		if (lookAheadIndex >= nTSeg)
-		{
-			// ex (300 + 40) - 300 = 40
-			lookAheadIndex -= nTSeg;
-		}
-		v3d *frontpos = dwTrDesc->getSegmentPtr(lookAheadIndex)->getMiddle();
-		drawCircleP(frontpos, 2);
-		*/
 	}
 
 	//Draws own car current position

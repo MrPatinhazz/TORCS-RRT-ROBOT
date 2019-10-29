@@ -37,13 +37,14 @@ static void shutdown(int index);
 void updateTextWindow(tSituation *situation, MyCar *myCar, Pathfinder *mpf);
 void treeExpand();
 int findMinIndex(v3d pos, vector<State *> list);
+void pathAdjust(Pathfinder*);
 //void treeRewire(v3d newPos);
 
 static RRT *myrrt = nullptr;									 //RRT class - holds the state pool and functions
 DWindow *dwind = nullptr;										 //Debug window class and functions
 tTrack *myTrack = nullptr;										 //Track holder
 v3d *strpos = {};												 //Pos written on dwindow											 
-bool windowCreated, treeInit, adjustPath, stAdded, goalReached; //Does debug window exist? // Has the tree started? // Has the path been adjusted
+bool windowCreated, treeInit, adjustPath, stAdded, goalReached;  //Does debug window exist? // Has the tree started? // Has the path been adjusted
 int startIndex = 0, goalIndex, overtakeId = 0, frame = 0;
 v3d randpos,goalTseg,startSeg;
 double stGlDist = 0;
@@ -167,21 +168,18 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//* Saves the pointer to Torcs Track and its width
 	myTrack = myTrackDesc->getTorcsTrack();
 
-
 	//* G.Init - Temp location.
-	/*
-	State *initState = new State(*myTrackDesc->getSegmentPtr(startIndex)->getMiddle());	
-	
-	//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
-	//v3d pos = {_x, _y, _z};
-	//State *initState = new State(pos);
-	
-	
-	myrrt->addToPool(*initState);
-	treeInit = true;
-
-	if (!ITERGROWTH && treeInit)
+	if(!ITERGROWTH)
 	{
+		State *initState = new State(*myTrackDesc->getSegmentPtr(0)->getMiddle());
+
+		//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
+		//v3d pos = {_x, _y, _z};
+		//State *initState = new State(pos);
+		
+		myrrt->addToPool(*initState);
+		treeInit = true;
+	
 		//* Expand the tree TREESIZE nodes
 		do
 		{
@@ -189,8 +187,6 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 			treeExpand();
 		} while (myrrt->getPool().size() < TREESIZE);
 	}
-	*/
-
 }
 
 /* initialize driver for the race, called for every selected driver */
@@ -244,31 +240,92 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	
 	overtakeId = ocar[1].getCurrentSegId();
 
-	if(mpf->gettOCar()[0].overtakee == 0 && !treeInit)
+	if(ITERGROWTH)
 	{
-		startIndex = overtakeId-50;
-		startSeg = *mpf->getPathSeg(startIndex)->getOptLoc();
-		State *initState = new State(startSeg);
-
-		goalIndex = overtakeId+50;
-		goalTseg = *mpf->getPathSeg(goalIndex)->getOptLoc();
-		stGlDist = Dist::eucl(startSeg,goalTseg);
-
-		myrrt->addToPool(*initState);
-		treeInit = true;
-	}
-
-	//* If growth is iterative && tree size not reached, expand
-	if (treeInit && ITERGROWTH && !goalReached)
-	{
-		treeExpand();
-		double toGoalDist = Dist::eucl(*myrrt->getPool().back()->getPos(), goalTseg);
-		if (toGoalDist < 10)
+		if(MAKEPATH && mpf->gettOCar()[0].overtakee == 0 && !treeInit)
 		{
-			goalReached = true;
-			adjustPath = true;
+			startIndex = overtakeId-50;
+			startSeg = *mpf->getPathSeg(startIndex)->getOptLoc();
+			State *initState = new State(startSeg);
+
+			goalIndex = overtakeId+50;
+			goalTseg = *mpf->getPathSeg(goalIndex)->getOptLoc();
+			stGlDist = Dist::eucl(startSeg,goalTseg);
+
+			myrrt->addToPool(*initState);
+			treeInit = true;
+		}
+
+		//* If growth is iterative && tree size not reached, expand
+		if (treeInit && !goalReached)
+		{
+			treeExpand();
+			double toGoalDist = Dist::eucl(*myrrt->getPool().back()->getPos(), goalTseg);
+			if (toGoalDist < 10)
+			{
+				goalReached = true;
+				adjustPath = true;
+			}
+		}
+
+		if (adjustPath && goalReached)
+		{
+			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
+			int minIndex = Util::findMinIndex(goalTseg, myrrt->getPool());
+			myrrt->addToPathV(*myrrt->getAt(minIndex));
+
+			//* Copies every state from the goal to the source to the pathVec
+			myrrt->backtrack();
+
+			//* Calls path adjustment
+			pathAdjust(mpf);
+
 		}
 	}
+	else
+	{
+		bool pathCompleted = false;
+
+		if(MAKEPATH && mpf->gettOCar()[0].overtakee == 0 && !pathCompleted)
+		{
+			startIndex = overtakeId-50;
+			startSeg = *mpf->getPathSeg(startIndex)->getOptLoc();
+
+			goalIndex = overtakeId+50;
+			goalTseg = *mpf->getPathSeg(goalIndex)->getOptLoc();
+
+			adjustPath = true;
+		}
+
+		if (adjustPath)
+		{
+			//* Finds the closest node to the selected track segment and adds it to path, making it a goal
+			int minIndex = Util::findMinIndex(goalTseg, myrrt->getPool());
+			myrrt->addToPathV(*myrrt->getAt(minIndex));
+			
+			//*BACKTRACK
+			State* currState = myrrt->getPathV().back();
+			double dist2Start = 9999;
+			
+			if(currState->getParent() == nullptr) cout << "no parent" << endl;
+
+			do
+			{
+				dist2Start = Dist::eucl(*currState->getPos(),startSeg);
+				if(dist2Start < 25)
+				{
+					break;
+				}
+				cout << "Dist" << dist2Start << endl;
+      			myrrt->addToPathV(*currState->getParent());
+      			currState = currState->getParent();	
+			} while (currState->getParent() != nullptr);
+
+			pathAdjust(mpf);
+			pathCompleted = true;
+		}
+	}
+	
 
 	/* decide how we want to drive */
 	if (car->_dammage < myc->undamaged / 3 && myc->bmode != myc->NORMAL)
@@ -304,24 +361,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		myc->loadBehaviour(myc->NORMAL);
 	}
 
-	if (MAKEPATH && adjustPath && goalReached)
-	{
-		//* Finds the closest node to the selected track segment and adds it to path, making it a goal
-		int minIndex = Util::findMinIndex(goalTseg, myrrt->getPool());
-		myrrt->addToPathV(*myrrt->getAt(minIndex));
-
-		//* Copies every state from the goal to the source to the pathVec
-		myrrt->backtrack();
-
-		for (int n = startIndex; n < goalIndex; n++)
-		{
-			int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getOptLoc(), myrrt->getPathV());
-			mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
-			mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(minIndex)->getPos());
-		}
-		adjustPath = false;
-	}
-
 	if(myc->getCurrentPos()->x > startSeg.x && myc->getCurrentPos()->x < goalTseg.x)
 	{
 		cout << "Following line" << endl;
@@ -331,7 +370,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		/* compute path according to the situation */
 		mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
 	}
-	//*CHANGES HERE
 
 	/* clear ctrl structure with zeros and set the current gear */
 	std::memset(&car->ctrl, 0, sizeof(tCarCtrl));
@@ -679,7 +717,15 @@ void treeExpand()
 			// Generates the new node colinear to xnear and xrand, step distance (heur.h) away. No edge coll. detection
 			v3d step = Util::step(myrrt->getAt(minIndex)->getPos(), &randpos);
 
-			posValid = (Util::isPosValid(myTrack, myTrackDesc, &step, ocar[1], startSeg, goalTseg));
+			if(ITERGROWTH)
+			{
+				posValid = (Util::isPosValid(myTrack, myTrackDesc, &step, ocar[1], startSeg, goalTseg));
+			}
+			else
+			{
+				posValid = (Util::isPosValid(myTrack, myTrackDesc, &step));
+			}
+			
 			if (!posValid){continue;}
 	
 			if (myrrt->getAt(minIndex)->getParent() != nullptr)
@@ -699,4 +745,16 @@ void treeExpand()
 			}
 		} while (!stAdded);
 	}
+}
+
+void pathAdjust(Pathfinder* mpf)
+{
+	for (int n = startIndex; n <= goalIndex; n++)
+	{
+		int minIndex = Util::findMinIndex(*mpf->getPathSeg(n)->getOptLoc(), myrrt->getPathV());
+		mpf->getPathSeg(n)->setLoc(myrrt->getPathV().at(minIndex)->getPos());
+		mpf->getPathSeg(n)->setOptLoc(myrrt->getPathV().at(minIndex)->getPos());
+	}
+	
+	adjustPath = false;
 }

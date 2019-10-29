@@ -10,13 +10,13 @@ using namespace std;
 
 //RRT Parameters
 #define DRAWWIN 1	  // Draws window
-#define MAKEPATH 0	 // Makes path
+#define MAKEPATH 1	 // Makes path
 #define SEGMARGIN 4.5  // Security margin (measured from mid segment)
-#define STEPSIZE 1 // Branch (step) size - Recommended < 0.50
-#define TREESIZE 1 // Tree Size - Recomended > 16k, was 25k for prints
-#define ITERGROWTH 1  // If tree grows iteratively (1) or completly offline (0)
+#define STEPSIZE 6 // Branch (step) size - Recommended < 7
+#define TREESIZE 10000 // Tree Size - Recomended > 16k, was 25k for prints
+#define ITERGROWTH 0 // If tree grows iteratively (1) or completly offline (0)
 #define EXPFREQ 1	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
-#define ANGLELIMIT 0 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
+#define ANGLELIMIT 165 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
 
 //Random number/state generators
 class RandomGen
@@ -78,6 +78,7 @@ public:
 		return v3d(nx, ny, nearState->z);
 	};
 
+	//For online expansion
 	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos, OtherCar tocar, v3d startP, v3d goalP)
 	{
 		//Ignores validation
@@ -103,6 +104,19 @@ public:
 		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
 		return (distToPos < SEGMARGIN) && xCheck && (distTocar > 4);
 	
+	};
+
+	// For offiline expansion
+	static bool isPosValid(tTrack *myTrack, TrackDesc *myTrackDesc, v3d *pos)
+	{
+		//Ignores validation
+		//return true;
+
+		int closestid = myTrackDesc->getNearestId(pos);
+		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
+
+		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
+		return (distToPos < SEGMARGIN);	
 	};
 
 	static bool isInside(double x1, double x2, double y1, double y2, double xa, double ya)

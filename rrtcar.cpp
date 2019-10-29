@@ -44,7 +44,7 @@ static RRT *myrrt = nullptr;									 //RRT class - holds the state pool and fun
 DWindow *dwind = nullptr;										 //Debug window class and functions
 tTrack *myTrack = nullptr;										 //Track holder
 v3d *strpos = {};												 //Pos written on dwindow											 
-bool windowCreated, treeInit, adjustPath, stAdded, goalReached;  //Does debug window exist? // Has the tree started? // Has the path been adjusted
+bool windowCreated, treeInit, adjustPath, stAdded, goalReached, pathCompleted;  //Does debug window exist? // Has the tree started? // Has the path been adjusted
 int startIndex = 0, goalIndex, overtakeId = 0, frame = 0;
 v3d randpos,goalTseg,startSeg;
 double stGlDist = 0;
@@ -171,6 +171,8 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//* G.Init - Temp location.
 	if(!ITERGROWTH)
 	{
+		auto start = chrono::steady_clock::now();
+
 		State *initState = new State(*myTrackDesc->getSegmentPtr(0)->getMiddle());
 
 		//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
@@ -186,6 +188,11 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 			cout << myrrt->getPool().size() << endl;
 			treeExpand();
 		} while (myrrt->getPool().size() < TREESIZE);
+		
+		auto end = chrono::steady_clock::now();
+		auto diff = end - start;
+
+		cout << "It took " << chrono::duration<double> (diff).count() << "s to build" << endl; 
 	}
 }
 
@@ -284,8 +291,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 	}
 	else
 	{
-		bool pathCompleted = false;
-
 		if(MAKEPATH && mpf->gettOCar()[0].overtakee == 0 && !pathCompleted)
 		{
 			startIndex = overtakeId-50;
@@ -312,7 +317,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 			do
 			{
 				dist2Start = Dist::eucl(*currState->getPos(),startSeg);
-				if(dist2Start < 25)
+				if(dist2Start < 10)
 				{
 					break;
 				}

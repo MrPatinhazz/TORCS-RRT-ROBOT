@@ -14,3 +14,6 @@ esta a LOOKAHEAD distancia desse.
 O carro segue o Loc com alguma margem. Caso a margem de erro nao o permita. 
 
 /////////////////////////////////////
+		//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
+		//v3d pos = {_x, _y, _z};
+		//State *initState = new State(pos);

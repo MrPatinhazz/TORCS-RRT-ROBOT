@@ -12,11 +12,11 @@ using namespace std;
 #define DRAWWIN 1	  // Draws window
 #define MAKEPATH 1	 // Makes path
 #define SEGMARGIN 4.5  // Security margin (measured from mid segment)
-#define STEPSIZE 6 // Branch (step) size - Recommended < 7
+#define STEPSIZE 1 // Branch (step) size - Recommended < 7
 #define TREESIZE 10000 // Tree Size - Recomended > 16k, was 25k for prints
-#define ITERGROWTH 0 // If tree grows iteratively (1) or completly offline (0)
+#define ITERGROWTH 1 // If tree grows iteratively (1) or completly offline (0)
 #define EXPFREQ 1	 // The tree expands each EXPFREQ frames (if ITERGROWTH)
-#define ANGLELIMIT 165 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
+#define ANGLELIMIT 0 // AB^C > ANGLELIMIT - A->B parent, B->xNear, C->xNew 
 
 //Random number/state generators
 class RandomGen
@@ -84,7 +84,7 @@ public:
 		//Ignores validation
 		//return true;
 		
-		
+		/*
 		bool xCheck = false;
 
 			if(goalP.x > startP.x) // Goal à direita
@@ -95,15 +95,15 @@ public:
 			{
 				xCheck = pos->x > goalP.x;
 			}
-
+		*/
 		double distTocar = Dist::eucl(*tocar.getCurrentPos(),*pos);
+		
 
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 
-		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
-		return (distToPos < SEGMARGIN) && xCheck && (distTocar > 4);
-	
+		//return (distToPos < SEGMARGIN) && xCheck && (distTocar > 4);
+		return (distToPos < SEGMARGIN) && (distTocar > 4);
 	};
 
 	// For offiline expansion
@@ -115,7 +115,6 @@ public:
 		int closestid = myTrackDesc->getNearestId(pos);
 		double distToPos = myTrackDesc->getSegmentPtr(closestid)->distToMiddle2D(pos->x, pos->y);
 
-		//return  //&& isInside(0 , myTrack->max.x, 0, myTrack->max.y,pos->x, pos->y) ;
 		return (distToPos < SEGMARGIN);	
 	};
 

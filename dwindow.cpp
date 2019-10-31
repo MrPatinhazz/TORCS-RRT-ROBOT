@@ -13,7 +13,7 @@
 #define MAPSEGWIDTH 1
 #define CIRCLEWIDTH 3
 #define LINEWIDTH 0.5
-#define SCALE 1.2
+#define SCALE 1.5
 #define STEPSKIP 8
 #define LOOKBACKDIST 40
 #define LOOKAHEADDIST 40
@@ -59,7 +59,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	{
 		glutInitWindowSize(300, 300);
 		statsInt = glutCreateWindow("Stats");
-		glutPositionWindow(250, 0);
+		glutPositionWindow(0, 0);
 		glutDisplayFunc(drawStatsWindow);
 	}
 
@@ -67,7 +67,7 @@ DWindow::DWindow(int w, int h, MyCar *mcar, RRT *mrrt, TrackDesc *mtdesc, Pathfi
 	{
 		glutInitWindowSize(w * SCALE, h * SCALE);
 		pathInt = glutCreateWindow("Drawing path");
-		glutPositionWindow(420, 0);
+		glutPositionWindow(0, 0);
 		glutDisplayFunc(drawPathWindow);
 	}
 }

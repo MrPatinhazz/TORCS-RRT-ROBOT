@@ -48,6 +48,7 @@ bool windowCreated, treeInit, adjustPath, stAdded, goalReached, pathCompleted;  
 int startIndex = 0, goalIndex, overtakeId = 0, frame = 0;
 v3d randpos,goalTseg,startSeg;
 double stGlDist = 0;
+double spInt, spTotal, spAvg;
 
 //******************************************************************************************/
 
@@ -171,13 +172,9 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 	//* G.Init - Temp location.
 	if(!ITERGROWTH)
 	{
-		auto start = chrono::steady_clock::now();
+		//auto start = chrono::steady_clock::now();
 
 		State *initState = new State(*myTrackDesc->getSegmentPtr(0)->getMiddle());
-
-		//double _x = (myTrack->max.x) / 2, _y = (myTrack->max.y) / 2, _z = 0;
-		//v3d pos = {_x, _y, _z};
-		//State *initState = new State(pos);
 		
 		myrrt->addToPool(*initState);
 		treeInit = true;
@@ -189,10 +186,10 @@ static void initTrack(int index, tTrack *track, void *carHandle, void **carParmH
 			treeExpand();
 		} while (myrrt->getPool().size() < TREESIZE);
 		
-		auto end = chrono::steady_clock::now();
-		auto diff = end - start;
+		//auto end = chrono::steady_clock::now();
+		//auto diff = end - start;
 
-		cout << "It took " << chrono::duration<double> (diff).count() << "s to build" << endl; 
+		//cout << "It took " << chrono::duration<double> (diff).count() << "s to build" << endl; 
 	}
 }
 
@@ -312,8 +309,6 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 			State* currState = myrrt->getPathV().back();
 			double dist2Start = 9999;
 			
-			if(currState->getParent() == nullptr) cout << "no parent" << endl;
-
 			do
 			{
 				dist2Start = Dist::eucl(*currState->getPos(),startSeg);
@@ -321,7 +316,7 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 				{
 					break;
 				}
-				cout << "Dist" << dist2Start << endl;
+
       			myrrt->addToPathV(*currState->getParent());
       			currState = currState->getParent();	
 			} while (currState->getParent() != nullptr);
@@ -366,14 +361,22 @@ static void drive(int index, tCarElt *car, tSituation *situation)
 		myc->loadBehaviour(myc->NORMAL);
 	}
 
+	
+	int currentIndex = mpf->getCurrentSegment(myc->getCarPtr());
 	if(myc->getCurrentPos()->x > startSeg.x && myc->getCurrentPos()->x < goalTseg.x)
+	//if(goalReached && currentIndex < goalIndex)
 	{
-		cout << "Following line" << endl;
+		spInt ++;
+		spTotal += myc->getSpeed();
+		spAvg = spTotal/spInt;
+
+		cout << spAvg << endl;
 	}
 	else
 	{
 		/* compute path according to the situation */
 		mpf->plan(myc->getCurrentSegId(), car, situation, myc, ocar);
+		cout << "___" << endl;
 	}
 
 	/* clear ctrl structure with zeros and set the current gear */
